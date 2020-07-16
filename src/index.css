@@ -1,0 +1,11 @@
+.taxResult {
+  min-width: 300px;
+}
+
+.salaryForm {
+  max-width: 190px;
+}
+
+.reportTotal {
+  background-color: lightgray;
+}
