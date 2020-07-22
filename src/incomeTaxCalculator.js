@@ -1,47 +1,38 @@
-import React from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import 'bootstrap/dist/css/bootstrap.css';
 import './index.css';
 
-export default class IncomeTaxCalculator extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            data: [],
-            errors: {},
-            salary: 0,
-            url: "https://sctaxcalcservice.azurewebsites.net/api/TaxResults/"
-        };
+export default function IncomeTaxCalculator () {
+    const [data, setData] = useState({})
+    const [errors, setErrors] = useState({})
+    const [salary, setSalary] = useState(0)
+    const url  = "https://sctaxcalcservice.azurewebsites.net/api/TaxResults/"
 
-        this.handleSubmit = this.handleSubmit.bind(this);
-        this.handleChange = this.handleChange.bind(this);
-    }
-
-    loadCommentsFromServer() {
+    const loadCommentsFromServer = useCallback(()=>{
         const xhr = new XMLHttpRequest();
-        xhr.open("get", this.state.url + this.state.salary, true);
+        xhr.open("get", url + salary, true);
         xhr.onload = () => {
             const data = JSON.parse(xhr.responseText);
-            this.setState({data: data});
+            setData(data);
         };
         xhr.send();
-    }
+    }, [salary])
 
-    handleSubmit(event) {
-        this.loadCommentsFromServer();
+    function handleSubmit(event) {
+        setSalary(event.target.value);
+        loadCommentsFromServer();
         event.preventDefault();
     }
 
-    handleChange(event) {
+    function handleChange(event) {
         if (event.target.value && !event.target.value.match(/^\d+$/)) 
-            this.setState({errors: {salary: "Not a number"}})
+            setErrors({salary: "Not a number"})
         else 
-            this.setState({errors: {salary: ""}})
-
-        this.setState({salary: event.target.value});
+            setErrors({salary: ""})
     }
 
-    resultListItems() {
-        return this.state.data.taxResultItems && this.state.data.taxResultItems.map((item, index) => {
+    function resultListItems() {
+        return data.taxResultItems && data.taxResultItems.map((item, index) => {
             return (
                 <li key={item.description} className={"list-group-item d-flex justify-content-between taxResult " + (item.isTotal ? "reportTotal" : "")}>
                     <div> <h6>{item.description}:</h6></div>
@@ -51,36 +42,36 @@ export default class IncomeTaxCalculator extends React.Component {
         });
     }
 
-    render() {
-        if (this.state.data.length === 0)
-            this.loadCommentsFromServer();
-
-        return (
-                <div className="row d-inline-flex flex-column flex-sm-row mx-3">
-                    <div className="d-flex" >
-                        <form onSubmit={this.handleSubmit}>
-                            <div className="form-group  salaryForm">
-                                <div><small>Annual Salary:</small></div>
-                                <div><input type="text" placeholder="salary"
-                                            className={"form-control " + (this.state.errors.salary ? "is-invalid" : "")}
-                                            onChange={this.handleChange}/></div>
-                                <div className="text-danger text-wrap" hidden={!this.state.errors.salary}>
-                                    <small>Must be a positive number wihthout punctuation.</small>
-                                </div>
-                            </div>
-                            <div>
-                                <input className="mt-2" disabled={this.state.errors.salary} type="submit"
-                                       value="Submit"/>
-                            </div>
-                        </form>
+    useEffect(()=>{
+        if (data.taxResultItems === undefined)
+             loadCommentsFromServer();
+    }, [salary, data, loadCommentsFromServer])
+    
+    return (
+        <div className="row d-inline-flex flex-column flex-sm-row mx-3">
+            <div className="d-flex" >
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group  salaryForm">
+                        <div><small>Annual Salary:</small></div>
+                        <div><input type="text" placeholder="salary"
+                                    className={"form-control " + (errors.salary ? "is-invalid" : "")}
+                                    onChange={handleChange}/></div>
+                        <div className="text-danger text-wrap" hidden={!errors.salary}>
+                            <small>Must be a positive number wihthout punctuation.</small>
+                        </div>
                     </div>
-                    <div className="mt-3 ml-0 mt-sm-0 ml-sm-3">
-                        <ul className="list-group">
-                            {this.resultListItems()}
-                        </ul>
+                    <div>
+                        <input className="mt-2" disabled={errors.salary} type="submit"
+                               value="Submit"/>
                     </div>
-                </div>
-        );
-    }
+                </form>
+            </div>
+            <div className="mt-3 ml-0 mt-sm-0 ml-sm-3">
+                <ul className="list-group">
+                    {resultListItems()}
+                </ul>
+            </div>
+        </div>
+    );
 }
 
