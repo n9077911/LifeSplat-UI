@@ -12,15 +12,11 @@ export default function IncomeTaxCalculator () {
     const url  = "https://sctaxcalcservice.azurewebsites.net/api/TaxResults/"
 
     const loadCommentsFromServer = useCallback(()=>{
-        const xhr = new XMLHttpRequest();
-        xhr.open("get", url + salary, true);
-        xhr.onload = () => {
-            const data = JSON.parse(xhr.responseText);
-            setData(data);
-        };
-        xhr.send();
+        fetch(url + salary)
+            .then((resp) => resp.json())
+            .then((data) => setData(data))
     }, [salary, spending, dob])
-
+    
     function handleSubmit(event) {
         loadCommentsFromServer();
         event.preventDefault();
