@@ -1,11 +1,14 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import 'bootstrap/dist/css/bootstrap.css';
-import './index.css';
+import DatePicker from "react-datepicker";
+
+import "react-datepicker/dist/react-datepicker.css";
 
 export default function IncomeTaxCalculator () {
     const [data, setData] = useState({})
     const [errors, setErrors] = useState({})
     const [salary, setSalary] = useState(0)
+    const [spending, setSpending] = useState(0)
+    const [dob, setDob] = useState(new Date(1981, 4, 1))
     const url  = "https://sctaxcalcservice.azurewebsites.net/api/TaxResults/"
 
     const loadCommentsFromServer = useCallback(()=>{
@@ -16,19 +19,28 @@ export default function IncomeTaxCalculator () {
             setData(data);
         };
         xhr.send();
-    }, [salary])
+    }, [salary, spending, dob])
 
     function handleSubmit(event) {
-        setSalary(event.target.value);
         loadCommentsFromServer();
         event.preventDefault();
     }
 
-    function handleChange(event) {
+    function handleSalaryChange(event) {
         if (event.target.value && !event.target.value.match(/^\d+$/)) 
             setErrors({salary: "Not a number"})
         else 
             setErrors({salary: ""})
+        
+        setSalary(event.target.value);
+    }
+    
+    function handleDateChange(dob) {
+        setDob(dob);
+    }
+    
+    function handleSpendingChange(event) {
+        setSpending(event.target.value);
     }
 
     function resultListItems() {
@@ -45,19 +57,38 @@ export default function IncomeTaxCalculator () {
     useEffect(()=>{
         if (data.taxResultItems === undefined)
              loadCommentsFromServer();
-    }, [salary, data, loadCommentsFromServer])
+    }, [data, loadCommentsFromServer])
     
     return (
         <div className="row d-inline-flex flex-column flex-sm-row mx-3">
             <div className="d-flex" >
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group  salaryForm">
+                <form onSubmit={handleSubmit} className="salaryForm">
+                    <div className="form-group">
                         <div><small>Annual Salary:</small></div>
                         <div><input type="text" placeholder="salary"
                                     className={"form-control " + (errors.salary ? "is-invalid" : "")}
-                                    onChange={handleChange}/></div>
+                                    onChange={handleSalaryChange}/></div>
                         <div className="text-danger text-wrap" hidden={!errors.salary}>
                             <small>Must be a positive number wihthout punctuation.</small>
+                        </div>
+                    </div>
+                    <div className="form-group">
+                        <div><small>Annual Spending:</small></div>
+                        <div><input type="text" placeholder="spending"
+                                    className={"form-control " + (errors.annualSpending ? "is-invalid" : "")}
+                                    onChange={handleSpendingChange}/></div>
+                        <div className="text-danger text-wrap" hidden={!errors.annualSpending}>
+                            <small>Must be a positive number wihthout punctuation.</small>
+                        </div>
+                    </div>
+                    <div className="form-group">
+                        <div><small>DOB:</small></div>
+                        <div><DatePicker
+                                selected={dob}
+                                onChange={handleDateChange}
+                                showYearDropdown
+                                showMonthDropdown
+                                dateFormat="dd/MM/yyyy"/>
                         </div>
                     </div>
                     <div>

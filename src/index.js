@@ -1,17 +1,18 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import "bootstrap/dist/css/bootstrap.css";
+import 'bootswatch/dist/darkly/bootstrap.min.css';
 import "./index.css";
 import IncomeTaxCalculator from "./incomeTaxCalculator";
+import {IntlProvider} from "react-intl";
 
 class IncomeTax extends React.Component {
     render() {
-        document.body.style = "background: #f8f9fa;";
+        document.body.style = "background: #222;";
         
         return (
-            <div className="container-fluid bg-light">
+            <div className="container-fluid">
                 <div className="m-3 text-left">
-                    <h1>Income Tax</h1>
+                    <h1>Retirement Planner</h1>
                 </div>
                 <IncomeTaxCalculator>
                 </IncomeTaxCalculator>
@@ -20,4 +21,12 @@ class IncomeTax extends React.Component {
     }
 }
 
-ReactDOM.render(<IncomeTax/>, document.getElementById("root"));
+const locale = (navigator.languages && navigator.languages[0])
+    || navigator.language
+    || 'en-GB';
+
+ReactDOM.render(
+    <IntlProvider locale={locale}>
+        <IncomeTax/>
+    </IntlProvider>
+        , document.getElementById("root"));
