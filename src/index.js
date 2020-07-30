@@ -2,8 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom";
 import 'bootswatch/dist/darkly/bootstrap.min.css';
 import "./index.css";
-import IncomeTaxCalculator from "./incomeTaxCalculator";
 import {IntlProvider} from "react-intl";
+import RetirementCalculator from "./retirementCalculator";
 
 class IncomeTax extends React.Component {
     render() {
@@ -14,8 +14,8 @@ class IncomeTax extends React.Component {
                 <div className="m-3 text-left">
                     <h1>Retirement Planner</h1>
                 </div>
-                <IncomeTaxCalculator>
-                </IncomeTaxCalculator>
+                <RetirementCalculator>
+                </RetirementCalculator>
             </div>
         );
     }
