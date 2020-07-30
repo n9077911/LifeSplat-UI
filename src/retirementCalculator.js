@@ -2,7 +2,6 @@ import React, {useCallback, useState} from 'react';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import RetirementReport from "./retirementReport";
-import Tab from "react-bootstrap/Tab";
 
 
 export default function RetirementCalculator () {

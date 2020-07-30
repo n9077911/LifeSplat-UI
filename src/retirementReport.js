@@ -48,15 +48,20 @@ export default function RetirementReport(props) {
         ]
     }
 
+    function formatMoney(number) {
+        return '£' + Math.round(number).toLocaleString()
+    }
+
     return (
         <div>
             <Tabs defaultActiveKey="highLevel">
                 <Tab eventKey="highLevel" title="Summary">
                     <ul>
-                        <li className="mt-2">You can retire in {moment(props.report.retirementDate).format("MMM YYYY")} at age &nbsp;<span className="text-success">{props.report.retirementAge}</span></li>
-                        <li className="mt-2">Your state pension starts in {moment(props.report.stateRetirementDate).format("MMM YYYY")} at age &nbsp;<span className="text-success">{props.report.stateRetirementAge}</span></li>
-                        <li className="mt-2">Your after tax salary is &nbsp;<span className="text-success">£30,000</span></li>
-                        <li className="mt-2">Your estimated state pension is &nbsp;<span className="text-success">£5400</span></li>
+                        <li className="mt-2">You can retire {moment(props.report.retirementDate).format("MMM YYYY")} at age &nbsp;<span className="text-big text-success">{props.report.retirementAge}</span></li>
+                        <li className="mt-2">Your state pension starts {moment(props.report.stateRetirementDate).format("MMM YYYY")} at age &nbsp;<span className="text-big text-success">{props.report.stateRetirementAge}</span></li>
+                        <li className="mt-2">Your after tax salary is &nbsp;<span className="text-big test-success">{formatMoney(props.report.afterTaxSalary)}</span></li>
+                        <li className="mt-2">Your estimated state pension would be &nbsp;<span className="text-big test-success">{formatMoney(props.report.annualStatePension)}</span></li>
+                        <li className="mt-2">You pay <span className="text-big text-danger">{formatMoney(props.report.nationalInsuranceBill+props.report.incomeTaxBill)}</span> of tax <small>(Income Tax: <span className="text-danger">{formatMoney(props.report.incomeTaxBill)}</span>, National Insurance: <span className="text-danger">{formatMoney(props.report.nationalInsuranceBill)}</span></small>)</li>
                     </ul>
                 </Tab>
                 <Tab eventKey="detail" title="Report">
