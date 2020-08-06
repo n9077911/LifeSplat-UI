@@ -1,7 +1,7 @@
 import React, {useEffect, useRef} from "react";
 import Chart from "chart.js";
 
-export default function AreaChart(props) {
+function AreaChart(props) {
     const chartRef = useRef(null)
 
     useEffect(() => {
@@ -16,23 +16,29 @@ export default function AreaChart(props) {
                 borderWidth: 1,
                 lineTension: 0,
                 maintainAspectRatio: false,
-
             }
         })
 
-        new Chart(chartRef.current, {
+        let chart = new Chart(chartRef.current, {
             type: 'line',
             options: {
                 scales: {
                     xAxes: [{type: 'time', time: {unit: 'year'}}],
                     yAxes: [{ticks: {min: 0}}]
+                },
+                animation: {
+                    duration: 0
                 }
             },
             data: {
                 labels: props.data.xAxis,
                 datasets: dataSets
             }
-        });
+        })
+
+        return () => {
+            chart.destroy();
+        }
     }, [props.color, props.data, props.title])
 
     return (
@@ -41,3 +47,5 @@ export default function AreaChart(props) {
         </div>
     );
 }
+
+export default React.memo(AreaChart)

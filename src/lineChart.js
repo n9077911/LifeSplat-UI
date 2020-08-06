@@ -1,16 +1,19 @@
 import React, {useEffect, useRef} from "react";
 import Chart from "chart.js";
 
-export default function LineChart(props) {
+function LineChart(props) {
     const chartRef = useRef(null)
 
     useEffect(() => {
-        new Chart(chartRef.current, {
+        let chart = new Chart(chartRef.current, {
             type: 'line',
             options: {
                 scales: {
                     xAxes: [{type: 'time', time: {unit: 'year'}}],
                     yAxes: [{ticks: {min: 0}}]
+                },
+                animation: {
+                    duration: 0
                 }
             },
             data: {
@@ -28,6 +31,10 @@ export default function LineChart(props) {
                 }]
             }
         });
+
+        return () => {
+            chart.destroy();
+        }
     }, [props.color, props.data, props.title])
 
     return (
@@ -36,4 +43,6 @@ export default function LineChart(props) {
         </div>
     );
 }
+
+export default React.memo(LineChart);
 
