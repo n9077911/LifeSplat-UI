@@ -1,6 +1,7 @@
 import React, {useEffect, useRef} from 'react';
 import Chart from 'chart.js';
 import {displayConstants, formatMoney} from './helpers';
+import 'chartjs-plugin-annotation';
 
 function AreaChart(props) {
     const chartRef = useRef(null)
@@ -21,7 +22,7 @@ function AreaChart(props) {
             }
         })
 
-        let annotations = props.data.annotations.map(a => {
+        let annotations = props.data.annotations && props.data.annotations.map(a => {
             return {
                 drawTime: 'afterDatasetsDraw',
                 type: 'line',
@@ -52,14 +53,13 @@ function AreaChart(props) {
                 scales: {
                     xAxes: [{
                         type: 'time', 
-                        time: {unit: 'year'}
+                        time: {unit: 'year'},
+                        ticks: {...(props.data.xAxesFormatCallback && {callback: props.data.xAxesFormatCallback})}
                     }],
                     yAxes: [{
                         ticks: {
                             min: 0, 
-                            callback: function (value, index, values) {
-                                return formatMoney(value);
-                            },
+                            ...(props.data.yAxesFormatCallback && {callback: props.data.yAxesFormatCallback})
                         },
                         stacked: true,
                         scaleLabel:{
@@ -75,7 +75,7 @@ function AreaChart(props) {
                     duration: 0
                 },
                 annotation: {
-                    annotations: annotations
+                    ...(annotations && {annotations: annotations})
                 }
             },
         })

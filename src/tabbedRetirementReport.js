@@ -2,8 +2,9 @@ import React from "react";
 import Tabs from 'react-bootstrap/Tabs'
 import Tab from 'react-bootstrap/Tab'
 import SummaryReport from "./summaryReport";
-import ChartReport from "./chartReport";
 import BreakdownReport from "./breakdownReport";
+import IncomeVsSpendingReport from "./incomeVsSpendingReport";
+import SavingsReport from "./savingsReport";
 
 export default function TabbedRetirementReport(props) {
 
@@ -13,8 +14,11 @@ export default function TabbedRetirementReport(props) {
                 <Tab eventKey="highLevel" title="Summary">
                     <SummaryReport report={props.report}/>
                 </Tab>
-                <Tab eventKey="charts" title="Income vs Spending">
-                    <ChartReport report={props.report} dob={props.dob}/>
+                <Tab eventKey="incomeVsSpendingChart" title="Income vs Spending">
+                    <IncomeVsSpendingReport report={props.report} dob={props.dob}/>
+                </Tab>
+                <Tab eventKey="savingsChart" title="Savings">
+                    <SavingsReport report={props.report}/>
                 </Tab>
                 {/*<Tab eventKey="numbers" title="Debug">*/}
                 {/*    <BreakdownReport report={props.report}/>*/}

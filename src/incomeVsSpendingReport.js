@@ -1,20 +1,14 @@
 import moment from "moment";
 import AreaChart from "./areaChart";
-import LineChart from "./lineChart";
 import React from "react";
 import {formatMoney, last} from "./helpers";
 
-export default function ChartReport(props) {
-    let cashIndex = props.report.stepsHeaders.indexOf('Cash')
+export default function IncomeVsSpendingReport(props) {
     let salaryIndex = props.report.stepsHeaders.indexOf('AfterTaxSalary')
     let statePensionIndex = props.report.stepsHeaders.indexOf('StatePension')
     let privatePensionGrowthIndex = props.report.stepsHeaders.indexOf('PrivatePensionGrowth')
-    let privatePensionAmountIndex = props.report.stepsHeaders.indexOf('PrivatePensionAmount')
     let growthIndex = props.report.stepsHeaders.indexOf('Growth')
     let dateIndex = props.report.stepsHeaders.indexOf('Date')
-    let savingsDataSet = props.report.steps.map(x => ({time: x[dateIndex], value: x[cashIndex]}))
-    let pensionDataSet = props.report.steps.map(x => ({time: x[dateIndex], value: x[privatePensionAmountIndex]}))
-    let pensionGrowthDataSet = props.report.steps.map(x => ({time: x[dateIndex], value: x[privatePensionGrowthIndex]}))
 
     // Debug comment, can be used to zoom in
     // let slice = props.report.steps.slice(50,100);
@@ -107,24 +101,6 @@ export default function ChartReport(props) {
                 data={incomeDataSets}
                 title="Income"
                 color="#70CAD1"/>
-        </div>
-        <div>
-            <LineChart
-                data={savingsDataSet}
-                title="Savings"
-                color="#70CAD1"/>
-        </div>
-        <div>
-            <LineChart
-                data={pensionDataSet}
-                title="Pension Pot"
-                color="#70CAD1"/>
-        </div>
-        <div>
-            <LineChart
-                data={pensionGrowthDataSet}
-                title="Pension Growth"
-                color="purple"/>
         </div>
     </div>;
 }
