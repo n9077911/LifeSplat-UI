@@ -3,12 +3,15 @@ import Table from 'react-bootstrap/Table'
 
 export default function BreakdownReport(props) {
 
-    let headers = props.report.stepsHeaders.map(s => <th>{s}</th>);
-    let body = props.report.steps.map(step => <tr>{step.map(v => <td>{v}</td>)}</tr>);
+    let key = 1;
+    let headers = props.report.stepsHeaders.map(s => <th key={key+=1}>{s}</th>);
+    let body = props.report.steps.map((step, i) => <tr key={i}>{step.map(v => <td key={key+=1}>{v}</td>)}</tr>);
     
     return <Table>
         <thead>
-            {headers}
+            <tr>
+                {headers}
+            </tr>
         </thead>
         <tbody>
             {body}

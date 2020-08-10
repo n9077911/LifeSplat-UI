@@ -5,7 +5,7 @@ import SummaryReport from "./summaryReport";
 import ChartReport from "./chartReport";
 import BreakdownReport from "./breakdownReport";
 
-export default function RetirementReport(props) {
+export default function TabbedRetirementReport(props) {
 
     return (
         <div>
@@ -13,12 +13,12 @@ export default function RetirementReport(props) {
                 <Tab eventKey="highLevel" title="Summary">
                     <SummaryReport report={props.report}/>
                 </Tab>
-                <Tab eventKey="charts" title="Report">
-                    <ChartReport report={props.report}/>
+                <Tab eventKey="charts" title="Income vs Spending">
+                    <ChartReport report={props.report} dob={props.dob}/>
                 </Tab>
-                <Tab eventKey="numbers" title="Breakdown">
-                    <BreakdownReport report={props.report}/>
-                </Tab>
+                {/*<Tab eventKey="numbers" title="Debug">*/}
+                {/*    <BreakdownReport report={props.report}/>*/}
+                {/*</Tab>*/}
             </Tabs>
         </div>
     );

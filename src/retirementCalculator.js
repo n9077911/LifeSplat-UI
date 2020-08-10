@@ -1,7 +1,7 @@
 import React, {useCallback, useState} from 'react';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import RetirementReport from "./retirementReport";
+import TabbedRetirementReport from "./tabbedRetirementReport";
 
 
 export default function RetirementCalculator () {
@@ -16,8 +16,8 @@ export default function RetirementCalculator () {
     const [targetRetirementAge, setTargetRetirementAge] = useState('')
     const [dob, setDob] = useState(new Date(1981, 4, 1))
     const [female, setFemale] = useState(false)
-    const url  = "https://localhost:5001/api/Retirement/Report"
-    // const url  = "https://sctaxcalcservice.azurewebsites.net/api/Retirement/Report"
+    // const url  = "https://localhost:5001/api/Retirement/Report"
+    const url  = "https://sctaxcalcservice.azurewebsites.net/api/Retirement/Report"
     // api/Retirement/Report?salary=100000&spending=40000&dob=1981-05-30&female=false&existingSavings=20000&existingPension=20000&employerContribution=3&employerContribution=5
 
     const loadReportFromServer = useCallback(()=>{
@@ -127,14 +127,14 @@ export default function RetirementCalculator () {
                         </div>
                     </div>
                     <div className="form-group">
-                        <div><small>Employer Contribution:</small></div>
+                        <div><small>Employer Contribution %:</small></div>
                         <div><input type="text" placeholder="employer contribution"
                                     className={"form-control " + (errors.employerContributionPension ? "is-invalid" : "")}
                                     onChange={handleEmployerContributionChange}
                                     value={employerContribution}/></div>
                     </div>
                     <div className="form-group">
-                        <div><small>Employee Contribution:</small></div>
+                        <div><small>Employee Contribution %:</small></div>
                         <div><input type="text" placeholder="employee contribution"
                                     className={"form-control " + (errors.employeeContributionPension ? "is-invalid" : "")}
                                     onChange={handleEmployeeContributionChange}
@@ -142,7 +142,7 @@ export default function RetirementCalculator () {
                     </div>
                     <div className="form-group">
                         <div><small>Target Retirement Age:</small></div>
-                        <div><input type="text" placeholder="target retirement age"
+                        <div><input type="text" placeholder="optional"
                                     className={"form-control " + (errors.targetRetirementAge ? "is-invalid" : "")}
                                     onChange={handleTargetRetirementAgeChange}
                                     value={targetRetirementAge}/></div>
@@ -181,7 +181,7 @@ export default function RetirementCalculator () {
                 </form>
             </div>
             <div className="w-auto mt-3 ml-0 mt-sm-0 ml-sm-3">
-                {data.retirementAge ? <RetirementReport report={data} /> :''}
+                {data.minimumPossibleRetirementAge ? <TabbedRetirementReport report={data} dob={dob}/> :''}
                 {data.error ? data.error : ''}
             </div>
         </div>

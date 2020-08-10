@@ -1,5 +1,6 @@
-import React, {useEffect, useRef} from "react";
-import Chart from "chart.js";
+import React, {useEffect, useRef} from 'react';
+import Chart from 'chart.js';
+import {displayConstants, formatMoney} from './helpers';
 
 function AreaChart(props) {
     const chartRef = useRef(null)
@@ -15,25 +16,68 @@ function AreaChart(props) {
                 borderColor: ds.color,
                 borderWidth: 1,
                 lineTension: 0,
+                steppedLine: ds.step || 'after',
                 maintainAspectRatio: false,
+            }
+        })
+
+        let annotations = props.data.annotations.map(a => {
+            return {
+                drawTime: 'afterDatasetsDraw',
+                type: 'line',
+                mode: a.axis.startsWith('x') ? 'vertical' : 'horizontal',
+                scaleID: a.axis,
+                value: a.value,
+                borderColor: a.color || '#28a745',
+                borderWidth: 6,
+                label: {
+                    yAdjust: a.yShift || 0,
+                    xAdjust: a.xShift || 0,
+                    position: a.position || 'centre',
+                    backgroundColor: 'white',
+                    fontColor: 'black',
+                    content: a.title,
+                    enabled: true,
+                }
             }
         })
 
         let chart = new Chart(chartRef.current, {
             type: 'line',
+            data: {
+                labels: props.data.xAxisLabels,
+                datasets: dataSets
+            },
             options: {
                 scales: {
-                    xAxes: [{type: 'time', time: {unit: 'year'}}],
-                    yAxes: [{ticks: {min: 0}}]
+                    xAxes: [{
+                        type: 'time', 
+                        time: {unit: 'year'}
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            min: 0, 
+                            callback: function (value, index, values) {
+                                return formatMoney(value);
+                            },
+                        },
+                        stacked: true,
+                        scaleLabel:{
+                            labelString: props.data.yAxisTitle,
+                            display: true,
+                            fontColor: 'white',
+                            fontFamily: displayConstants().fontFamily,
+                            fontSize: 18
+                        }
+                    }]
                 },
                 animation: {
                     duration: 0
+                },
+                annotation: {
+                    annotations: annotations
                 }
             },
-            data: {
-                labels: props.data.xAxis,
-                datasets: dataSets
-            }
         })
 
         return () => {
@@ -42,8 +86,8 @@ function AreaChart(props) {
     }, [props.color, props.data, props.title])
 
     return (
-        <div className="chart-container">
-            <canvas id="chart" ref={chartRef}/>
+        <div className='chart-container'>
+            <canvas id='chart' ref={chartRef}/>
         </div>
     );
 }

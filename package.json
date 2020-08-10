@@ -9,6 +9,7 @@
     "bootstrap": "^4.5.0",
     "bootswatch": "^4.5.0",
     "chart.js": "^2.9.3",
+    "chartjs-plugin-annotation": "git+https://github.com/chartjs/chartjs-plugin-annotation.git",
     "moment": "^2.27.0",
     "react": "^16.13.1",
     "react-bootstrap": "^1.2.2",

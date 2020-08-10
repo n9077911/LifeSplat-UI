@@ -1,5 +1,6 @@
 import React, {useEffect, useRef} from "react";
 import Chart from "chart.js";
+import 'chartjs-plugin-annotation';
 
 function LineChart(props) {
     const chartRef = useRef(null)
@@ -14,7 +15,7 @@ function LineChart(props) {
                 },
                 animation: {
                     duration: 0
-                }
+                },
             },
             data: {
                 labels: props.data.map(d => d.time),
