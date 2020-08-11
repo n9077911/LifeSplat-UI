@@ -17,7 +17,7 @@ function AreaChart(props) {
                 borderColor: ds.color,
                 borderWidth: 1,
                 lineTension: 0,
-                steppedLine: ds.step || 'after',
+                steppedLine: ds.step ?? 'after',
                 maintainAspectRatio: false,
             }
         })
@@ -54,7 +54,14 @@ function AreaChart(props) {
                     xAxes: [{
                         type: 'time', 
                         time: {unit: 'year'},
-                        ticks: {...(props.data.xAxesFormatCallback && {callback: props.data.xAxesFormatCallback})}
+                        ticks: {...(props.data.xAxesFormatCallback && {callback: props.data.xAxesFormatCallback})},
+                        scaleLabel:{
+                            labelString: props.data.xAxisTitle,
+                            display: true,
+                            fontColor: 'white',
+                            fontFamily: displayConstants().fontFamily,
+                            fontSize: 18
+                        }
                     }],
                     yAxes: [{
                         ticks: {

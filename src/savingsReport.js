@@ -1,35 +1,46 @@
-import moment from "moment";
-import {formatMoney, last} from "./helpers";
 import AreaChart from "./areaChart";
 import React from "react";
+import {formatMoney} from "./helpers";
+import addDateBasedAnnotations from "./dateBasedAnnotations";
+import moment from "moment";
 
 export default function SavingsReport(props) {
     let cashIndex = props.report.stepsHeaders.indexOf('Cash')
     let privatePensionAmountIndex = props.report.stepsHeaders.indexOf('PrivatePensionAmount')
     let dateIndex = props.report.stepsHeaders.indexOf('Date')
 
-    // Debug comment, can be used to zoom in
-    // let slice = props.report.steps.slice(50,100);
-    let slice = props.report.steps;
-
     let incomeDataSets = {
         yAxisTitle: 'Total',
         xAxisTitle: 'Age',
-        xAxisLabels: slice.map(x => x[dateIndex]),
+        xAxisLabels: props.report.steps.map(x => x[dateIndex]),
         dataSets: [
             {
-                title: 'Investment Earnings',
+                title: 'Investments',
                 color: 'LightCyan',
-                data: slice.map(x => x[cashIndex] > 0 ? x[cashIndex] : null)
+                step: false,
+                data: props.report.steps.map(x => x[cashIndex] > 0 ? x[cashIndex] : null)
             },
             {
-                title: 'Private Pension',
+                title: 'Private Pension - Locked away',
+                color: 'violet',
+                step: false,
+                data: props.report.steps
+                    .map(x => moment(x[dateIndex]).isSameOrBefore(props.report.privateRetirementDate) && x[privatePensionAmountIndex] > 0 ? x[privatePensionAmountIndex] : null)
+            },
+            {
+                title: 'Private Pension - Active',
                 color: 'Purple',
-                data: slice
-                    .map(x => x[privatePensionAmountIndex] > 0 ? x[privatePensionAmountIndex] : null)
+                step: false,
+                data: props.report.steps
+                    .map(x => moment(x[dateIndex]).isAfter(props.report.privateRetirementDate) && x[privatePensionAmountIndex] > 0 ? x[privatePensionAmountIndex] : null)
             },
         ],
     }
+
+    incomeDataSets.annotations = addDateBasedAnnotations(incomeDataSets.annotations, props.report)
+
+    incomeDataSets.xAxesFormatCallback = (value) => parseInt(value) - props.dob.getFullYear();
+    incomeDataSets.yAxesFormatCallback = (value) => formatMoney(value);
 
     return <div className="d-flex flex-column">
         <div>
