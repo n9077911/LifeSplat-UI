@@ -1,6 +1,6 @@
 import moment from "moment";
 import React from "react";
-import {formatMoney} from "./helpers";
+import {formatMoney} from "../helpers";
 
 export default function SummaryReport(props) {
 

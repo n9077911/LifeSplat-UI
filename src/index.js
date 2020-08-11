@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import 'bootswatch/dist/darkly/bootstrap.min.css';
 import "./index.css";
 import {IntlProvider} from "react-intl";
-import RetirementCalculator from "./retirementCalculator";
+import RetirementCalculator from "./components/retirementCalculator";
 
 class IncomeTax extends React.Component {
     render() {

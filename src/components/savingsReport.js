@@ -1,8 +1,8 @@
-import AreaChart from "./areaChart";
+import AreaChart from "./charts/areaChart";
 import React from "react";
-import {formatMoney} from "./helpers";
-import addDateBasedAnnotations from "./dateBasedAnnotations";
+import addDateBasedAnnotations from "../dateBasedAnnotations";
 import moment from "moment";
+import {formatMoney} from "../helpers";
 
 export default function SavingsReport(props) {
     let cashIndex = props.report.stepsHeaders.indexOf('Cash')
@@ -39,8 +39,8 @@ export default function SavingsReport(props) {
 
     incomeDataSets.annotations = addDateBasedAnnotations(incomeDataSets.annotations, props.report)
 
-    incomeDataSets.xAxesFormatCallback = (value) => parseInt(value) - props.dob.getFullYear();
-    incomeDataSets.yAxesFormatCallback = (value) => formatMoney(value);
+    incomeDataSets.xAxesFormatCallback = (input) => moment(input).month() === props.dob.getMonth() ? moment(input).year() - props.dob.getFullYear() : ''
+    incomeDataSets.yAxesFormatCallback = (input) => formatMoney(input)
 
     return <div className="d-flex flex-column">
         <div>

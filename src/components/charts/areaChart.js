@@ -1,6 +1,6 @@
 import React, {useEffect, useRef} from 'react';
 import Chart from 'chart.js';
-import {displayConstants, formatMoney} from './helpers';
+import {displayConstants, formatMoney} from '../../helpers';
 import 'chartjs-plugin-annotation';
 
 function AreaChart(props) {
@@ -53,8 +53,10 @@ function AreaChart(props) {
                 scales: {
                     xAxes: [{
                         type: 'time', 
-                        time: {unit: 'year'},
-                        ticks: {...(props.data.xAxesFormatCallback && {callback: props.data.xAxesFormatCallback})},
+                        time: {unit: 'month'},
+                        ticks: {
+                            source: 'labels',
+                            ...(props.data.xAxesFormatCallback && {callback: props.data.xAxesFormatCallback})},
                         scaleLabel:{
                             labelString: props.data.xAxisTitle,
                             display: true,

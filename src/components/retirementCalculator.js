@@ -19,7 +19,9 @@ export default function RetirementCalculator () {
     // const url  = "https://localhost:5001/api/Retirement/Report"
     const url  = "https://sctaxcalcservice.azurewebsites.net/api/Retirement/Report"
     // api/Retirement/Report?salary=100000&spending=40000&dob=1981-05-30&female=false&existingSavings=20000&existingPension=20000&employerContribution=3&employerContribution=5
-
+    
+    let submittedDob = dob
+    
     const loadReportFromServer = useCallback(()=>{
         fetch(url + '?salary=' + salary + '&spending=' + spending
             + '&dob=' + dob.toISOString() + '&female=' + female + "&existingSavings=" + existingSavings 
@@ -28,6 +30,7 @@ export default function RetirementCalculator () {
             .then((resp) => resp.json())
             .then((data) => 
             {
+                submittedDob = dob;
                 setData(data)
             })
             .catch(reason => {
@@ -181,7 +184,7 @@ export default function RetirementCalculator () {
                 </form>
             </div>
             <div className="w-auto mt-3 ml-0 mt-sm-0 ml-sm-3">
-                {data.minimumPossibleRetirementAge ? <TabbedRetirementReport report={data} dob={dob}/> :''}
+                {data.minimumPossibleRetirementAge ? <TabbedRetirementReport report={data} dob={submittedDob}/> :''}
                 {data.error ? data.error : ''}
             </div>
         </div>

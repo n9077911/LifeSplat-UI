@@ -1,10 +1,10 @@
 import moment from "moment";
-import {formatMoney, last} from "./helpers";
-import AreaChart from "./areaChart";
+import {formatMoney, last} from "../helpers";
+import AreaChart from "./charts/areaChart";
 import React from "react";
-import addDateBasedAnnotations from "./dateBasedAnnotations";
+import addDateBasedAnnotations from "../dateBasedAnnotations";
 
-export default function IncomeVsSpendingReport(props) {
+function IncomeVsSpendingReport(props) {
     let salaryIndex = props.report.stepsHeaders.indexOf('AfterTaxSalary')
     let statePensionIndex = props.report.stepsHeaders.indexOf('StatePension')
     let privatePensionGrowthIndex = props.report.stepsHeaders.indexOf('PrivatePensionGrowth')
@@ -65,17 +65,16 @@ export default function IncomeVsSpendingReport(props) {
                 fill: 'origin',
                 data: slice.map(x => {
                     let privatePension = moment(x[dateIndex]).isAfter(props.report.privateRetirementDate) ? x[privatePensionGrowthIndex] : 0
-                    let spentSavings = props.report.spending - x[statePensionIndex] - privatePension - x[growthIndex] - x[salaryIndex];
-                    return spentSavings > 0 && moment(x[dateIndex]).isSameOrAfter(props.report.bankruptDate) ? spentSavings : null;
+                    let spentSavings = props.report.spending - x[statePensionIndex] - privatePension - x[growthIndex] - x[salaryIndex]
+                    return spentSavings > 0 && moment(x[dateIndex]).isSameOrAfter(props.report.bankruptDate) ? spentSavings : null
                 })
             }
         )
     
     incomeDataSets.annotations = addDateBasedAnnotations(incomeDataSets.annotations, props.report)
 
-
-    incomeDataSets.xAxesFormatCallback = (value) => parseInt(value) - props.dob.getFullYear();
-    incomeDataSets.yAxesFormatCallback = (value) => formatMoney(value);
+    incomeDataSets.xAxesFormatCallback = (input) => moment(input).month() === props.dob.getMonth() ? moment(input).year() - props.dob.getFullYear() : ''
+    incomeDataSets.yAxesFormatCallback = (input) => formatMoney(input)
 
     return <div className="d-flex flex-column">
         <div>
@@ -86,3 +85,5 @@ export default function IncomeVsSpendingReport(props) {
         </div>
     </div>;
 }
+
+export default React.memo(IncomeVsSpendingReport)
