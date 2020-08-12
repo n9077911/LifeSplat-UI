@@ -6,7 +6,7 @@ import BreakdownReport from "./breakdownReport";
 import SavingsReport from "./savingsReport";
 import IncomeVsSpendingReport from "./incomeVsSpendingReport";
 
-function TabbedRetirementReport(props) {
+export default function TabbedRetirementReport(props) {
 
     return (
         <div>
@@ -28,5 +28,4 @@ function TabbedRetirementReport(props) {
     );
 }
 
-export default React.memo(TabbedRetirementReport)
 

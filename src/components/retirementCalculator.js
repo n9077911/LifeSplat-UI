@@ -2,91 +2,74 @@ import React, {useCallback, useState} from 'react';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import TabbedRetirementReport from "./tabbedRetirementReport";
+import update from 'immutability-helper';
 
 export default function RetirementCalculator() {
     const [data, setData] = useState({})
     const [errors, setErrors] = useState({})
-    const [salary, setSalary] = useState(100_000)
-    const [savings, setExistingSavings] = useState(10_000)
-    const [pension, setExistingPension] = useState(10_000)
-    const [employerContribution, setEmployerContribution] = useState(3)
-    const [employeeContribution, setEmployeeContribution] = useState(5)
     const [spending, setSpending] = useState(20_000)
     const [targetRetirementAge, setTargetRetirementAge] = useState('')
-    const [dob, setDob] = useState(new Date(1981, 4, 1))
-    const [female, setFemale] = useState(false)
+    const [person, setPerson] = useState({salary: 100_000, savings: 10_000, pension: 10_000, employerContribution: 3, employeeContribution: 5, female: false, dob: new Date(1981, 4, 1)})
+
     // const url  = "https://localhost:5001/api/Retirement/Report"
     const url = "https://sctaxcalcservice.azurewebsites.net/api/Retirement/Report"
     // api/Retirement/Report?salary=100000&spending=40000&dob=1981-05-30&female=false&savings=20000&existingPension=20000&employerContribution=3&employerContribution=5
 
-    let submittedDob = dob
+    let submittedDob = person.dob;
 
     const loadReportFromServer = useCallback(() => {
-        fetch(url + '?salary=' + salary + '&spending=' + spending
-            + '&dob=' + dob.toISOString() + '&female=' + female + "&savings=" + savings
-            + "&existingPension=" + pension + "&employerContribution=" + employerContribution
-            + "&employeeContribution=" + employeeContribution + (targetRetirementAge && "&targetRetirementAge=" + targetRetirementAge))
+        fetch(url + '?salary=' + (person.salary || 0) + '&spending=' + spending
+            + '&dob=' + person.dob.toISOString() + '&female=' + person.female + "&existingSavings=" + (person.savings || 0)
+            + "&existingPension=" + (person.pension || 0) + "&employerContribution=" + (person.employerContribution || 0)
+            + "&employeeContribution=" + (person.employeeContribution || 0) + (targetRetirementAge && "&targetRetirementAge=" + targetRetirementAge))
             .then((resp) => resp.json())
             .then((data) => {
-                submittedDob = dob;
+                // submittedDob = person.dob;
                 setData(data)
             })
             .catch(reason => {
                     setData({error: reason.toString()})
                 }
             )
-    }, [salary, spending, dob, female, savings, pension, employerContribution, employeeContribution, targetRetirementAge])
+    }, [spending, targetRetirementAge, person])
 
     function handleSubmit(event) {
         loadReportFromServer();
         event.preventDefault();
     }
 
-    function handleSalaryChange(event) {
-        if (event.target.value && !event.target.value.match(/^\d+$/))
-            setErrors({salary: "Not a number"})
-        else
-            setErrors({salary: ""})
-
-        setSalary(event.target.value);
-    }
-
-    function handleDateChange(dob) {
-        setDob(dob);
-    }
-
     function handleSpendingChange(event) {
-        if (event.target.value && !event.target.value.match(/^\d+$/))
-            setErrors({spending: "Not a number"})
-        else
-            setErrors({spending: ""})
-
+        setErrorForMoney(event, 'spending')
         setSpending(event.target.value);
     }
-
-    function handleSavingsChange(event) {
-        setExistingSavings(event.target.value);
-    }
-
-    function handlePensionChange(event) {
-        setExistingPension(event.target.value);
-    }
-
-    function handleEmployerContributionChange(event) {
-        setEmployerContribution(event.target.value);
-    }
-
-    function handleEmployeeContributionChange(event) {
-        setEmployeeContribution(event.target.value);
-    }
-
     function handleTargetRetirementAgeChange(event) {
+        if (event.target.value && parseInt(event.target.value) > 100)
+            setErrors(update(errors, {targetRetirementAge: {$set: "Not a number"}}))
+        else
+            setErrors(update(errors, {targetRetirementAge: {$set: ""}}))
         setTargetRetirementAge(event.target.value);
     }
+    
+    let handleSalaryChange = (event) => handleMoneyChange(event, 'salary')
+    let handleSavingsChange = (event) => handleMoneyChange(event, 'savings')
+    let handlePensionChange = (event) => handleMoneyChange(event, 'pension')
+    let handleEmployerContributionChange = (event) => setPerson(update(person, {employerContribution: {$set: event.target.value}}))
+    let handleEmployeeContributionChange = (event) => setPerson(update(person, {employeeContribution: {$set: event.target.value}}))
+    let onChangeMaleFemale = (event) => setPerson(update(person, {female: {$set: event.target.value === "true"}}))
+    let handleDateChange = (dob) => setPerson(update(person, {dob: {$set: dob}}))
 
-    function onChangeMaleFemale(event) {
-        setFemale(event.target.value === "true")
+    function setErrorForMoney(event, fieldName) {
+        if (event.target.value && !event.target.value.match(/^\d+$/))
+            setErrors(update(errors, {[fieldName]: {$set: "Not a number"}}))
+        else
+            setErrors(update(errors, {[fieldName]: {$set: ""}}))
     }
+
+    function handleMoneyChange(event, fieldName) {
+        setErrorForMoney(event, fieldName);
+        setPerson(update(person, {[fieldName]: {$set: event.target.value}}));
+    }
+
     
     return (
         <div id="formAndResults" className="row d-flex flex-column">
@@ -95,8 +78,8 @@ export default function RetirementCalculator() {
                     <div className='' style={{width: '95vw'}}>
                         <div id="formComponents" className="d-flex-column flex-wrap">
                             <div className="d-flex">
-                                <FormInputMoney error={errors.annualSpending} handleChange={handleSpendingChange} value={spending} placeHolder={'spending'}>
-                                Annual Spending
+                                <FormInputMoney error={errors.spending} handleChange={handleSpendingChange} value={spending} placeHolder={'spending'}>
+                                    Annual Spending
                                 </FormInputMoney>
                                 <FormInput error={errors.targetRetirementAge} handleChange={handleTargetRetirementAgeChange} value={targetRetirementAge} placeHolder={'optional'}
                                            errorMessage={'Must be between 18 and 100'} inputClass="input-control-age">
@@ -105,25 +88,25 @@ export default function RetirementCalculator() {
                             </div>
                             <div id="person1">
                                 <div className="d-flex flex-wrap">
-                                    <FormInputMoney error={errors.annualSalary} handleChange={handleSalaryChange} value={salary} placeHolder={'salary'}>
+                                    <FormInputMoney error={errors.salary} handleChange={handleSalaryChange} value={person.salary} placeHolder={'salary'}>
                                         Annual Salary
                                     </FormInputMoney>
-                                        <FormInputMoney error={errors.savings} handleChange={handleSavingsChange} value={savings} placeHolder={'savings'}>
+                                    <FormInputMoney error={errors.savings} handleChange={handleSavingsChange} value={person.savings} placeHolder={'savings'}>
                                         Savings
                                     </FormInputMoney>
-                                    <FormInputMoney error={errors.existingPension} handleChange={handlePensionChange} value={pension} placeHolder={'pension'}>
+                                    <FormInputMoney error={errors.pension} handleChange={handlePensionChange} value={person.pension} placeHolder={'pension'}>
                                         Existing Pension
                                     </FormInputMoney>
-                                        <FormInputPercent error={errors.employerContribution} handleChange={handleEmployerContributionChange} value={employerContribution}>
+                                        <FormInputPercent error={errors.employerContribution} handleChange={handleEmployerContributionChange} value={person.employerContribution}>
                                         Employer Contribution
                                     </FormInputPercent>
-                                        <FormInputPercent error={errors.employeeContribution} handleChange={handleEmployeeContributionChange} value={employeeContribution}>
+                                        <FormInputPercent error={errors.employeeContribution} handleChange={handleEmployeeContributionChange} value={person.employeeContribution}>
                                         Employee Contribution
                                     </FormInputPercent>
                                     <div className="form-group">
                                         <FormGroupLabel>DOB:</FormGroupLabel>
                                         <div className="mr-1"><DatePicker
-                                            selected={dob}
+                                            selected={person.dob}
                                             onChange={handleDateChange}
                                             showYearDropdown
                                             showMonthDropdown
@@ -180,7 +163,7 @@ function FormInput(props) {
                    value={props.value}/>
         </div>
         <div className="text-danger text-wrap" hidden={!props.error}>
-            <small>props.errorMessage</small>
+            <small>{props.errorMessage}</small>
         </div>
     </div>;
 }
