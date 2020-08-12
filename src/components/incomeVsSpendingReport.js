@@ -56,7 +56,7 @@ function IncomeVsSpendingReport(props) {
             {axis: "y-axis-0", value: props.report.spending, title: ['You spend', formatMoney(props.report.spending) + ' per month'], color: '#dc3545', position: 'left', xShift: 20, yShift: -10},
         ]
     }
-    
+
     if (moment(props.report.bankruptDate).year() < 4000)
         incomeDataSets.dataSets.push(
             {
@@ -70,19 +70,17 @@ function IncomeVsSpendingReport(props) {
                 })
             }
         )
-    
+
     incomeDataSets.annotations = addDateBasedAnnotations(incomeDataSets.annotations, props.report)
 
     incomeDataSets.xAxesFormatCallback = (input) => moment(input).month() === props.dob.getMonth() ? moment(input).year() - props.dob.getFullYear() : ''
     incomeDataSets.yAxesFormatCallback = (input) => formatMoney(input)
 
-    return <div className="d-flex flex-column">
-        <div>
-            <AreaChart
-                data={incomeDataSets}
-                title="Income"
-                color="#70CAD1"/>
-        </div>
+    return <div>
+        <AreaChart
+            data={incomeDataSets}
+            title="Income"
+            color="#70CAD1"/>
     </div>;
 }
 

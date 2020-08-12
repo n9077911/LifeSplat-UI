@@ -11,8 +11,10 @@ class IncomeTax extends React.Component {
         
         return (
             <div className="container-fluid">
-                <div className="m-3 text-left">
-                    <h1>Retirement Planner<small className="text-muted"> - Alpha 0.1</small></h1>
+                <div className="row">
+                    <div className="ml-1 ml-md-3 mt-md-3 text-left">
+                        <h2>Projekt.me<small className="text-muted"> - Alpha 0.1</small></h2>
+                    </div>
                 </div>
                 <RetirementCalculator>
                 </RetirementCalculator>

@@ -1,9 +1,25 @@
 .salaryForm {
-  max-width: 190px;
+  /*max-width: 190px;*/
 }
 
 .reportTotal {
   background-color: darkgray;
+}
+
+.input-control-money {
+  width: 100px
+}
+
+.input-control-percent {
+  width: 100px
+}
+
+.input-control-age {
+  width: 100px
+}
+
+.no-wrap {
+  white-space: nowrap;
 }
 
 .text-big {
@@ -13,6 +29,10 @@
 
 .chart-container {
   position: relative;
-  margin: auto;
-  width:2000px;
+  width:90vw;
+  min-width: 1000px;
+  /*margin: auto;*/
+  /*width:2000px;*/
 }
+
+

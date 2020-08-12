@@ -6,11 +6,11 @@ import BreakdownReport from "./breakdownReport";
 import SavingsReport from "./savingsReport";
 import IncomeVsSpendingReport from "./incomeVsSpendingReport";
 
-export default function TabbedRetirementReport(props) {
+function TabbedRetirementReport(props) {
 
     return (
         <div>
-            <Tabs defaultActiveKey="highLevel">
+            <Tabs defaultActiveKey="highLevel" className="mx-0">
                 <Tab eventKey="highLevel" title="Summary">
                     <SummaryReport report={props.report}/>
                 </Tab>
@@ -27,4 +27,6 @@ export default function TabbedRetirementReport(props) {
         </div>
     );
 }
+
+export default React.memo(TabbedRetirementReport)
 
