@@ -9,31 +9,43 @@ export default function RetirementCalculator() {
     const [errors, setErrors] = useState([{}])
     const [spending, setSpending] = useState(20_000)
     const [targetRetirementAge, setTargetRetirementAge] = useState('')
-    const [person, setPerson] = useState([{salary: 100_000, savings: 10_000, pension: 10_000, employerContribution: 3, employeeContribution: 5, female: false, dob: new Date(1981, 4, 1)},
+    const [persons, setPersons] = useState([{salary: 100_000, savings: 10_000, pension: 10_000, employerContribution: 3, employeeContribution: 5, female: false, dob: new Date(1981, 4, 1)},
         {salary: 100_000, savings: 10_000, pension: 10_000, employerContribution: 3, employeeContribution: 5, female: false, dob: new Date(1981, 4, 1)}])
 
-    // const url  = "https://localhost:5001/api/Retirement/Report"
-    const url = "https://sctaxcalcservice.azurewebsites.net/api/Retirement/Report"
+    const url  = "https://localhost:5001/api/Retirement/Report"
+    // const url = "https://sctaxcalcservice.azurewebsites.net/api/Retirement/Report"
     // api/Retirement/Report?salary=100000&spending=40000&dob=1981-05-30&female=false&savings=20000&existingPension=20000&employerContribution=3&employerContribution=5
 
-    const submittedDob = useRef(person[0].dob);
+    const submittedDob = useRef(persons[0].dob);
+
+    function requestBody(person, spending, targetRetirementAge) {
+        return{spending: spending,
+            targetRetirementAge: targetRetirementAge === '' ? 0 : parseInt(targetRetirementAge),
+            persons: person}
+    }
 
     const loadReportFromServer = useCallback(() => {
-        let p = person[0];
-        fetch(url + '?salary=' + (p.salary || 0) + '&spending=' + spending
-            + '&dob=' + p.dob.toISOString() + '&female=' + p.female + "&existingSavings=" + (p.savings || 0)
-            + "&existingPension=" + (p.pension || 0) + "&employerContribution=" + (p.employerContribution || 0)
-            + "&employeeContribution=" + (p.employeeContribution || 0) + (targetRetirementAge && "&targetRetirementAge=" + targetRetirementAge))
-            .then((resp) => resp.json())
-            .then((data) => {
-                submittedDob.current = person[0].dob;
-                setData(data)
-            })
-            .catch(reason => {
-                    setData({error: reason.toString()})
-                }
-            )
-    }, [spending, targetRetirementAge, person])
+        fetch(url, {
+            method: 'POST',
+            accept: 'application/json',
+            cache: 'no-cache', 
+            credentials: 'same-origin', 
+            headers: {},
+            redirect: 'follow', 
+            referrerPolicy: 'no-referrer',
+            body: JSON.stringify(requestBody(persons, spending, targetRetirementAge))
+        })
+        .then((resp) => {
+            return resp.json()})
+        .then((data) => {
+            submittedDob.current = persons[0].dob;
+            setData(data)
+        })
+        .catch(reason => {
+                setData({error: reason.toString()})
+            }
+        )
+    }, [spending, targetRetirementAge, persons])
 
     function handleSubmit(event) {
         loadReportFromServer();
@@ -50,17 +62,17 @@ export default function RetirementCalculator() {
             setErrors(update(errors, {targetRetirementAge: {$set: "Not a number"}}))
         else
             setErrors(update(errors, {targetRetirementAge: {$set: ""}}))
-        setTargetRetirementAge(event.target.value);
+        setTargetRetirementAge(parseInt(event.target.value));
     }
 
     let handleSalaryChange = (personIndex) => (event) => handleMoneyChange(event, personIndex, 'salary')
-   
+
     let handleSavingsChange = (personIndex) => (event) => handleMoneyChange(event, personIndex, 'savings')
     let handlePensionChange = (personIndex) => (event) => handleMoneyChange(event, personIndex, 'pension')
-    let handleEmployerContributionChange = (personIndex) => (event) => setPerson(update(person, {[personIndex] : {employerContribution: {$set: event.target.value}}}))
-    let handleEmployeeContributionChange = (personIndex) => (event) => setPerson(update(person, {[personIndex] : {employeeContribution: {$set: event.target.value}}}))
-    let onChangeMaleFemale = (personIndex) => (event) => setPerson(update(person, {[personIndex] : {female: {$set: event.target.value === "true"}}}))
-    let handleDob = (personIndex) => (dob) => setPerson(update(person, {[personIndex] : {dob: {$set: dob}}}))
+    let handleEmployerContributionChange = (personIndex) => (event) => setPersons(update(persons, {[personIndex] : {employerContribution: {$set: event.target.value}}}))
+    let handleEmployeeContributionChange = (personIndex) => (event) => setPersons(update(persons, {[personIndex] : {employeeContribution: {$set: event.target.value}}}))
+    let onChangeMaleFemale = (personIndex) => (event) => setPersons(update(persons, {[personIndex] : {female: {$set: event.target.value === "true"}}}))
+    let handleDob = (personIndex) => (dob) => setPersons(update(persons, {[personIndex] : {dob: {$set: dob}}}))
 
     function setErrorForMoney(event, fieldName) {
         if (event.target.value && !event.target.value.match(/^\d+$/))
@@ -71,18 +83,18 @@ export default function RetirementCalculator() {
 
     function handleMoneyChange(event, personIndex, fieldName) {
         setErrorForMoney(event, fieldName);
-        let updatedPerson = update(person, {[personIndex] : {[fieldName]: {$set: event.target.value}}});
-        setPerson(updatedPerson);
+        let updatedPerson = update(persons, {[personIndex] : {[fieldName]: {$set: event.target.value}}});
+        setPersons(updatedPerson);
     }
-    
+
     function personChangeHandlers(index)
     {
         return {salary: handleSalaryChange(index),
             savings: handleSavingsChange(index),
-            pension: handlePensionChange(index), 
+            pension: handlePensionChange(index),
             employerContribution: handleEmployerContributionChange(index),
-            employeeContribution: handleEmployeeContributionChange(index), 
-            maleFemale: onChangeMaleFemale(index), 
+            employeeContribution: handleEmployeeContributionChange(index),
+            maleFemale: onChangeMaleFemale(index),
             dob: handleDob(index)}
     }
 
@@ -101,8 +113,8 @@ export default function RetirementCalculator() {
                                     Target Retirement Age:
                                 </FormInput>
                             </div>
-                            <PersonFormSection changeHandlers={personChangeHandlers(0)} person={person[0]} errors={errors}/>
-                            {person.length > 1 ? <PersonFormSection changeHandlers={personChangeHandlers(1)} person={person[1]} errors={errors}/> : ''}
+                            <PersonFormSection changeHandlers={personChangeHandlers(0)} person={persons[0]} errors={errors}/>
+                            {persons.length > 1 ? <PersonFormSection changeHandlers={personChangeHandlers(1)} person={persons[1]} errors={errors}/> : ''}
                         </div>
                         <div>
                             <input className="btn btn-primary" disabled={errors.salary} type="submit"
