@@ -9,7 +9,8 @@ export default function RetirementCalculator() {
     const [errors, setErrors] = useState([{}])
     const [spending, setSpending] = useState(20_000)
     const [targetRetirementAge, setTargetRetirementAge] = useState('')
-    const [person, setPerson] = useState([{salary: 100_000, savings: 10_000, pension: 10_000, employerContribution: 3, employeeContribution: 5, female: false, dob: new Date(1981, 4, 1)}])
+    const [person, setPerson] = useState([{salary: 100_000, savings: 10_000, pension: 10_000, employerContribution: 3, employeeContribution: 5, female: false, dob: new Date(1981, 4, 1)},
+        {salary: 100_000, savings: 10_000, pension: 10_000, employerContribution: 3, employeeContribution: 5, female: false, dob: new Date(1981, 4, 1)}])
 
     // const url  = "https://localhost:5001/api/Retirement/Report"
     const url = "https://sctaxcalcservice.azurewebsites.net/api/Retirement/Report"
@@ -59,7 +60,7 @@ export default function RetirementCalculator() {
     let handleEmployerContributionChange = (personIndex) => (event) => setPerson(update(person, {[personIndex] : {employerContribution: {$set: event.target.value}}}))
     let handleEmployeeContributionChange = (personIndex) => (event) => setPerson(update(person, {[personIndex] : {employeeContribution: {$set: event.target.value}}}))
     let onChangeMaleFemale = (personIndex) => (event) => setPerson(update(person, {[personIndex] : {female: {$set: event.target.value === "true"}}}))
-    let handleDateChange = (personIndex) => (dob) => setPerson(update(person, {[personIndex] : {dob: {$set: dob}}}))
+    let handleDob = (personIndex) => (dob) => setPerson(update(person, {[personIndex] : {dob: {$set: dob}}}))
 
     function setErrorForMoney(event, fieldName) {
         if (event.target.value && !event.target.value.match(/^\d+$/))
@@ -70,7 +71,19 @@ export default function RetirementCalculator() {
 
     function handleMoneyChange(event, personIndex, fieldName) {
         setErrorForMoney(event, fieldName);
-        setPerson(update(person, {[personIndex] : {[fieldName]: {$set: event.target.value}}}));
+        let updatedPerson = update(person, {[personIndex] : {[fieldName]: {$set: event.target.value}}});
+        setPerson(updatedPerson);
+    }
+    
+    function personChangeHandlers(index)
+    {
+        return {salary: handleSalaryChange(index),
+            savings: handleSavingsChange(index),
+            pension: handlePensionChange(index), 
+            employerContribution: handleEmployerContributionChange(index),
+            employeeContribution: handleEmployeeContributionChange(index), 
+            maleFemale: onChangeMaleFemale(index), 
+            dob: handleDob(index)}
     }
 
     return (
@@ -88,14 +101,8 @@ export default function RetirementCalculator() {
                                     Target Retirement Age:
                                 </FormInput>
                             </div>
-                            <PersonFormSection handleSalaryChange={handleSalaryChange(0)} handleSavingsChange={handleSavingsChange(0)} handlePensionChange={handlePensionChange(0)}
-                                               handleEmployerContributionChange={handleEmployerContributionChange(0)} handleEmployeeContributionChange={handleEmployeeContributionChange(0)}
-                                               onChangeMaleFemale={onChangeMaleFemale(0)} handleDateChange={handleDateChange(0)} person={person[0]} errors={errors}/>
-
-                            {/*<PersonFormSection handleSalaryChange={handleSalaryChange} handleSavingsChange={handleSavingsChange} handlePensionChange={handlePensionChange}*/}
-                            {/*                   handleEmployerContributionChange={handleEmployerContributionChange} handleEmployeeContributionChange={handleEmployeeContributionChange}*/}
-                            {/*                   onChangeMaleFemale={onChangeMaleFemale} handleDateChange={handleDateChange} person={person[1]} errors={errors[1]}/>*/}
-
+                            <PersonFormSection changeHandlers={personChangeHandlers(0)} person={person[0]} errors={errors}/>
+                            {person.length > 1 ? <PersonFormSection changeHandlers={personChangeHandlers(1)} person={person[1]} errors={errors}/> : ''}
                         </div>
                         <div>
                             <input className="btn btn-primary" disabled={errors.salary} type="submit"
@@ -115,32 +122,32 @@ export default function RetirementCalculator() {
 function PersonFormSection(props) {
     return <div id="person1">
         <div className="d-flex flex-wrap">
-            <FormInputMoney error={props.errors.salary} handleChange={props.handleSalaryChange} value={props.person.salary} placeHolder={'salary'}>
+            <FormInputMoney error={props.errors.salary} handleChange={props.changeHandlers.salary} value={props.person.salary} placeHolder={'salary'}>
                 Annual Salary
             </FormInputMoney>
-            <FormInputMoney error={props.errors.savings} handleChange={props.handleSavingsChange} value={props.person.savings} placeHolder={'savings'}>
+            <FormInputMoney error={props.errors.savings} handleChange={props.changeHandlers.savings} value={props.person.savings} placeHolder={'savings'}>
                 Savings
             </FormInputMoney>
-            <FormInputMoney error={props.errors.pension} handleChange={props.handlePensionChange} value={props.person.pension} placeHolder={'pension'}>
+            <FormInputMoney error={props.errors.pension} handleChange={props.changeHandlers.pension} value={props.person.pension} placeHolder={'pension'}>
                 Existing Pension
             </FormInputMoney>
-            <FormInputPercent error={props.errors.employerContribution} handleChange={props.handleEmployerContributionChange} value={props.person.employerContribution}>
+            <FormInputPercent error={props.errors.employerContribution} handleChange={props.changeHandlers.employerContribution} value={props.person.employerContribution}>
                 Employer Contribution
             </FormInputPercent>
-            <FormInputPercent error={props.errors.employeeContribution} handleChange={props.handleEmployeeContributionChange} value={props.person.employeeContribution}>
+            <FormInputPercent error={props.errors.employeeContribution} handleChange={props.changeHandlers.employeeContribution} value={props.person.employeeContribution}>
                 Employee Contribution
             </FormInputPercent>
             <div className="form-group">
                 <FormGroupLabel>DOB:</FormGroupLabel>
                 <div className="mr-1"><DatePicker
                     selected={props.person.dob}
-                    onChange={props.handleDateChange}
+                    onChange={props.changeHandlers.dob}
                     showYearDropdown
                     showMonthDropdown
                     dateFormat="dd/MM/yyyy"/>
                 </div>
             </div>
-            <FormGenderRadio onChange={props.onChangeMaleFemale}/>
+            <FormGenderRadio onChange={props.changeHandlers.maleFemale}/>
         </div>
     </div>
 }
