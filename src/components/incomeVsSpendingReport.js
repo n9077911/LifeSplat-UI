@@ -1,73 +1,60 @@
 import moment from "moment";
-import {formatMoney, last} from "../helpers";
+import {formatMoney, positiveOrNull} from "../helpers";
 import AreaChart from "./charts/areaChart";
 import React from "react";
 import addDateBasedAnnotations from "../dateBasedAnnotations";
+import Report from "../model/report";
 
 function IncomeVsSpendingReport(props) {
-    let salaryIndex = props.report.stepsHeaders.indexOf('AfterTaxSalary')
-    let statePensionIndex = props.report.stepsHeaders.indexOf('StatePension')
-    let privatePensionGrowthIndex = props.report.stepsHeaders.indexOf('PrivatePensionGrowth')
-    let growthIndex = props.report.stepsHeaders.indexOf('Growth')
-    let dateIndex = props.report.stepsHeaders.indexOf('Date')
 
-    // Debug comment, can be used to zoom in
-    // let slice = props.report.steps.slice(50,100);
-    let slice = props.report.steps;
+    let steps = props.report.person[0].steps;
+    
+    let report = new Report(props.report);
 
     let incomeDataSets = {
         yAxisTitle: 'Per Month',
         xAxisTitle: 'Age',
-        xAxisLabels: slice.map(x => x[dateIndex]),
+        xAxisLabels: steps.map(x => x[report.dateIndex]),
         dataSets: [
             {
                 title: 'Salary',
                 color: 'OrangeRed',
-                data: slice.map((x) => x[salaryIndex] > 0 ? x[salaryIndex] : null)
+                data: steps.map((x, i) => positiveOrNull(report.salary(i)))
             },
             {
                 title: 'State Pension',
                 color: 'LawnGreen',
-                data: slice.map(x => x[statePensionIndex] > 0 ? x[statePensionIndex] : null)
+                data: steps.map((x, i) => positiveOrNull(report.statePension(i)))
             },
             {
                 title: 'Private Pension',
                 color: 'Purple',
-                data: slice
-                    .map(x => moment(x[dateIndex]).isAfter(props.report.privateRetirementDate) && x[privatePensionGrowthIndex] > 0 ? x[privatePensionGrowthIndex] : null)
+                data: steps.map((x, i) => positiveOrNull(report.privatePensionGrowthToSpend(i)))
             },
             {
                 title: 'Investment Earnings',
                 color: 'LightCyan',
-                data: slice.map(x => x[growthIndex] > 0 ? x[growthIndex] : null)
+                data: steps.map((x, i) => positiveOrNull(report.investmentGrowth(i)))
             },
             {
                 title: 'Savings',
                 color: 'orange',
                 fill: 'origin',
-                data: slice.map(x => {
-                    let privatePension = moment(x[dateIndex]).isAfter(props.report.privateRetirementDate) ? x[privatePensionGrowthIndex] : 0
-                    let spentSavings = props.report.spending - x[statePensionIndex] - privatePension - x[growthIndex] - x[salaryIndex];
-                    return spentSavings > 0 && moment(x[dateIndex]).isSameOrBefore(props.report.bankruptDate) ? spentSavings : null;
-                })
+                data: steps.map((x, i) => positiveOrNull(report.savingsSpentPreBankrupt(i)))
             },
         ],
         annotations: [
-            {axis: "y-axis-0", value: props.report.spending, title: ['You spend', formatMoney(props.report.spending) + ' per month'], color: '#dc3545', position: 'left', xShift: 20, yShift: -10},
+            {axis: "y-axis-0", value: props.report.monthlySpending, title: ['You spend', formatMoney(props.report.monthlySpending) + ' per month'], color: '#dc3545', position: 'left', xShift: 20, yShift: -10},
         ]
     }
-
+    
     if (moment(props.report.bankruptDate).year() < 4000)
         incomeDataSets.dataSets.push(
             {
                 title: 'Bankrupt!',
                 color: 'red',
                 fill: 'origin',
-                data: slice.map(x => {
-                    let privatePension = moment(x[dateIndex]).isAfter(props.report.privateRetirementDate) ? x[privatePensionGrowthIndex] : 0
-                    let spentSavings = props.report.spending - x[statePensionIndex] - privatePension - x[growthIndex] - x[salaryIndex]
-                    return spentSavings > 0 && moment(x[dateIndex]).isSameOrAfter(props.report.bankruptDate) ? spentSavings : null
-                })
+                data: steps.map((x, i) => positiveOrNull(report.savingsSpentPostBankrupt(i)))
             }
         )
 
@@ -85,3 +72,4 @@ function IncomeVsSpendingReport(props) {
 }
 
 export default React.memo(IncomeVsSpendingReport)
+

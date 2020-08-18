@@ -5,9 +5,12 @@ import SummaryReport from "./summaryReport";
 import BreakdownReport from "./breakdownReport";
 import SavingsReport from "./savingsReport";
 import IncomeVsSpendingReport from "./incomeVsSpendingReport";
+import Report from "../model/report";
 
 export default function TabbedRetirementReport(props) {
 
+    let report = new Report(props.report);
+    
     return (
         <div>
             <Tabs defaultActiveKey="highLevel" className="mx-0">
@@ -18,7 +21,7 @@ export default function TabbedRetirementReport(props) {
                     <IncomeVsSpendingReport report={props.report} dob={props.dob}/>
                 </Tab>
                 <Tab eventKey="savingsReport" title="Savings">
-                    <SavingsReport report={props.report} dob={props.dob}/>
+                    <SavingsReport report={report} dob={props.dob}/>
                 </Tab>
                 {/*<Tab eventKey="numbers" title="Debug">*/}
                 {/*    <BreakdownReport report={props.report}/>*/}

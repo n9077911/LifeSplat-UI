@@ -2,42 +2,39 @@ import AreaChart from "./charts/areaChart";
 import React from "react";
 import addDateBasedAnnotations from "../dateBasedAnnotations";
 import moment from "moment";
-import {formatMoney} from "../helpers";
+import {formatMoney, positiveOrNull} from "../helpers";
 
 export default function SavingsReport(props) {
-    let cashIndex = props.report.stepsHeaders.indexOf('Cash')
-    let privatePensionAmountIndex = props.report.stepsHeaders.indexOf('PrivatePensionAmount')
-    let dateIndex = props.report.stepsHeaders.indexOf('Date')
+
+    let stepDates = props.report.stepDates();
 
     let incomeDataSets = {
         yAxisTitle: 'Total',
         xAxisTitle: 'Age',
-        xAxisLabels: props.report.steps.map(x => x[dateIndex]),
+        xAxisLabels: stepDates,
         dataSets: [
             {
                 title: 'Investments',
                 color: 'LightCyan',
                 step: false,
-                data: props.report.steps.map(x => x[cashIndex] > 0 ? x[cashIndex] : null)
+                data: stepDates.map((x, i)=> positiveOrNull(props.report.savings(i)))
             },
             {
                 title: 'Private Pension - Locked away',
                 color: 'violet',
                 step: false,
-                data: props.report.steps
-                    .map(x => moment(x[dateIndex]).isSameOrBefore(props.report.privateRetirementDate) && x[privatePensionAmountIndex] > 0 ? x[privatePensionAmountIndex] : null)
+                data: stepDates.map((x, i) => positiveOrNull(props.report.privatePensionPotLockedAway(i)))
             },
             {
                 title: 'Private Pension - Active',
                 color: 'Purple',
                 step: false,
-                data: props.report.steps
-                    .map(x => moment(x[dateIndex]).isAfter(props.report.privateRetirementDate) && x[privatePensionAmountIndex] > 0 ? x[privatePensionAmountIndex] : null)
+                data: stepDates.map((x, i) => positiveOrNull(props.report.privatePensionPotAvailable(i)))
             },
         ],
     }
 
-    incomeDataSets.annotations = addDateBasedAnnotations(incomeDataSets.annotations, props.report)
+    incomeDataSets.annotations = addDateBasedAnnotations(incomeDataSets.annotations, props.report.rawReport)
 
     incomeDataSets.xAxesFormatCallback = (input) => moment(input).month() === props.dob.getMonth() ? moment(input).year() - props.dob.getFullYear() : ''
     incomeDataSets.yAxesFormatCallback = (input) => formatMoney(input)

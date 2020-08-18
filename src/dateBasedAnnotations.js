@@ -15,15 +15,15 @@ export default function addDateBasedAnnotations(annotations, report) {
         return ['Age ' + age, moment(date).format('MMM yy')]
     }
 
-    let privatePensionTime = message(ageBased, report.privateRetirementAge, report.privateRetirementDate) ;
+    let privatePensionTime = message(ageBased, report.person[0].privateRetirementAge, report.person[0].privateRetirementDate) ;
     let minRetirementTime = message(ageBased, report.minimumPossibleRetirementAge, report.minimumPossibleRetirementDate) ;
-    let statePensionTime = message(ageBased, report.stateRetirementAge, report.stateRetirementDate) ;
+    let statePensionTime = message(ageBased, report.person[0].stateRetirementAge, report.person[0].stateRetirementDate) ;
     let targetRetirementTime = message(ageBased, report.targetRetirementAge, report.targetRetirementDate) ;
     
     let newAnnotations = [
         {axis: "x-axis-0", value: report.minimumPossibleRetirementDate, title: [wentBankrupt() ? 'Safe retirement' : 'You could retire', ...minRetirementTime], yShift: -50},
-        {axis: "x-axis-0", value: report.privateRetirementDate, title: ['Private Pension', ...privatePensionTime], yShift: 0},
-        {axis: "x-axis-0", value: report.stateRetirementDate, title: ['State Pension', ...statePensionTime], yShift: 0}]
+        {axis: "x-axis-0", value: report.person[0].privateRetirementDate, title: ['Private Pension', ...privatePensionTime], yShift: 0},
+        {axis: "x-axis-0", value: report.person[0].stateRetirementDate, title: ['State Pension', ...statePensionTime], yShift: 0}]
 
 
     if (report.targetRetirementAge) {
