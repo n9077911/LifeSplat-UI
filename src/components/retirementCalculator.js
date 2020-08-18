@@ -7,28 +7,29 @@ import update from 'immutability-helper';
 export default function RetirementCalculator() {
     const [data, setData] = useState({})
     const [errors, setErrors] = useState({})
-    const [personErrors, setPersonErrors] = useState([{},{}])
+    const [personErrors, setPersonErrors] = useState([{}])
     const [spending, setSpending] = useState(20_000)
     const [targetRetirementAge, setTargetRetirementAge] = useState('')
-    const [persons, setPersons] = useState([{salary: "50000", savings: "50000", pension: "50000", employerContribution: "3", employeeContribution: "5", female: false, dob: new Date(1981, 4, 1)},
-        {salary: "50000", savings: "50000", pension: "50000", employerContribution: "3", employeeContribution: "5", female: false, dob: new Date(1981, 4, 1)}])
+    const [persons, setPersons] = useState([{salary: "50000", savings: "50000", pension: "50000", employerContribution: "3", employeeContribution: "5", female: false, dob: new Date(1981, 4, 1)}])
 
     const url = "https://localhost:5001/api/Retirement/Report"
     // const url = "https://sctaxcalcservice.azurewebsites.net/api/Retirement/Report"
 
     const submittedDob = useRef(persons[0].dob);
+    const fullyCalcd = useRef(true);
 
     function requestBody(persons, spending, targetRetirementAge) {
         persons = persons.map((p) => {
             return {
                 spending: spending / persons.length,
-                salary: parseInt(p.salary),
-                savings: parseInt(p.savings),
-                pension: parseInt(p.pension),
-                employerContribution: parseInt(p.employerContribution),
-                employeeContribution: parseInt(p.employeeContribution),
+                salary: parseInt(p.salary || 0),
+                savings: parseInt(p.savings || 0),
+                pension: parseInt(p.pension || 0),
+                employerContribution: parseInt(p.employerContribution || 0),
+                employeeContribution: parseInt(p.employeeContribution || 0),
                 female: p.female,
-                dob: p.dob}
+                dob: p.dob
+            }
         })
 
         return {
@@ -52,6 +53,7 @@ export default function RetirementCalculator() {
                 return resp.json()
             })
             .then((data) => {
+                fullyCalcd.current = true;
                 submittedDob.current = persons[0].dob;
                 setData(data)
             })
@@ -66,9 +68,29 @@ export default function RetirementCalculator() {
         event.preventDefault();
     }
 
+    function setStale() {
+        if (data.person)
+            fullyCalcd.current = false;
+    }
+
+    function handleAddRemovePartner(event) {
+        if (persons.length === 1) {
+            persons.push({dob: persons[0].dob})
+            personErrors.push({})
+        } else {
+            persons.pop()
+            personErrors.pop()
+        }
+        setStale();
+        setPersons(Array.from(persons))
+        setPersonErrors(Array.from(personErrors))
+        event.preventDefault();
+    }
+
     function handleSpendingChange(event) {
         setErrorForNumber(event, 'spending')
         setSpending(event.target.value);
+        setStale();
     }
 
     function handleTargetRetirementAgeChange(event) {
@@ -77,6 +99,7 @@ export default function RetirementCalculator() {
         else
             setErrors(update(errors, {targetRetirementAge: {$set: ""}}))
         setTargetRetirementAge(event.target.value);
+        setStale();
     }
 
     let handleSalaryChange = (personIndex) => (event) => handleNumberChange(event, personIndex, 'salary')
@@ -84,8 +107,16 @@ export default function RetirementCalculator() {
     let handlePensionChange = (personIndex) => (event) => handleNumberChange(event, personIndex, 'pension')
     let handleEmployerContributionChange = (personIndex) => (event) => handleNumberChange(event, personIndex, 'employerContribution')
     let handleEmployeeContributionChange = (personIndex) => (event) => handleNumberChange(event, personIndex, 'employeeContribution')
-    let onChangeMaleFemale = (personIndex) => (event) => setPersons(update(persons, {[personIndex]: {female: {$set: event.target.value === "true"}}}))
-    let handleDob = (personIndex) => (dob) => setPersons(update(persons, {[personIndex]: {dob: {$set: dob}}}))
+    
+    let handleMaleFemale = (personIndex) => (event) => {
+        setStale()
+        return setPersons(update(persons, {[personIndex]: {female: {$set: event.target.value === "true"}}}))
+    }
+    
+    let handleDob = (personIndex) => (dob) => {
+        setStale()
+        return setPersons(update(persons, {[personIndex]: {dob: {$set: dob}}}))
+    }
 
     function setPersonErrorForNumber(event, personIndex, fieldName) {
         if (event.target.value && !event.target.value.match(/^\d+$/))
@@ -93,7 +124,7 @@ export default function RetirementCalculator() {
         else
             setPersonErrors(update(personErrors, {[personIndex]: {[fieldName]: {$set: ""}}}))
     }
-    
+
     function setErrorForNumber(event, fieldName) {
         if (event.target.value && !event.target.value.match(/^\d+$/))
             setErrors(update(errors, {[fieldName]: {$set: "Not a number"}}))
@@ -102,6 +133,7 @@ export default function RetirementCalculator() {
     }
 
     function handleNumberChange(event, personIndex, fieldName) {
+        setStale();
         setPersonErrorForNumber(event, personIndex, fieldName);
         let updatedPerson = update(persons, {[personIndex]: {[fieldName]: {$set: event.target.value}}});
         setPersons(updatedPerson);
@@ -114,7 +146,7 @@ export default function RetirementCalculator() {
             pension: handlePensionChange(index),
             employerContribution: handleEmployerContributionChange(index),
             employeeContribution: handleEmployeeContributionChange(index),
-            maleFemale: onChangeMaleFemale(index),
+            maleFemale: handleMaleFemale(index),
             dob: handleDob(index)
         }
     }
@@ -122,7 +154,7 @@ export default function RetirementCalculator() {
     return (
         <div id="formAndResults" className="row d-flex flex-column">
             <div id="form">
-                <form onSubmit={handleSubmit} className="salaryForm ml-1 ml-md-3">
+                <form className="salaryForm ml-1 ml-md-3">
                     <div className='' style={{width: '95vw'}}>
                         <div id="formComponents" className="d-flex-column flex-wrap">
                             <div className="d-flex">
@@ -135,11 +167,17 @@ export default function RetirementCalculator() {
                                 </FormInput>
                             </div>
                             <PersonFormSection changeHandlers={personChangeHandlers(0)} person={persons[0]} errors={personErrors} index={0}/>
-                            {persons.length > 1 ? <PersonFormSection changeHandlers={personChangeHandlers(1)} person={persons[1]} errors={personErrors} index={1} /> : ''}
+                            {persons.length > 1 ?
+                                <PersonFormSection changeHandlers={personChangeHandlers(1)} person={persons[1]} errors={personErrors} index={1}/>
+                                : ''}
                         </div>
                         <div>
-                            <input className="btn btn-primary" disabled={errors.salary} type="submit"
-                                   value="Submit"/>
+                            <button className="btn btn-primary mr-2" onClick={handleAddRemovePartner}>
+                                {persons.length === 2 ? "Remove Partner" : "Add Partner"}
+                            </button>
+                            <button className={"btn mr-2 " + (fullyCalcd.current ? "btn-success" : "btn-warning")} disabled={errors.salary} onClick={handleSubmit}>
+                                Calculate
+                            </button>
                         </div>
                     </div>
                 </form>
@@ -153,7 +191,7 @@ export default function RetirementCalculator() {
 }
 
 function PersonFormSection(props) {
-    return <div id={"person"+props.index}>
+    return <div id={"person" + props.index}>
         <div className="d-flex flex-wrap">
             <FormInputMoney error={props.errors[props.index].salary} handleChange={props.changeHandlers.salary} value={props.person.salary} placeHolder={'salary'}>
                 Annual Salary
@@ -210,7 +248,7 @@ function FormInput(props) {
     return <div className={'form-group input-control-group mr-2 '}>
         <FormGroupLabel>{props.children}</FormGroupLabel>
         <div className={'input-group ' + props.inputClass}>
-            {props.prepend 
+            {props.prepend
                 ? <div className="input-group-prepend">
                     <span className="input-group-prepend input-group-text">{props.prepend}</span>
                 </div>
@@ -231,22 +269,21 @@ function FormInput(props) {
     </div>;
 }
 
-
 function FormGenderRadio(props) {
     return <div className="mr-1 mt-3">
         <fieldset className="form-group" onChange={props.onChange}>
             <div>
                 <div className="form-check">
                     <label className="form-check-label">
-                        <input type="radio" className="form-check-input" name={"maleFemaleRadios"+props.index}
-                               id={"maleRadios"+props.index} value="false" defaultChecked={true}/>
+                        <input type="radio" className="form-check-input" name={"maleFemaleRadios" + props.index}
+                               id={"maleRadios" + props.index} value="false" defaultChecked={true}/>
                         Male
                     </label>
                 </div>
                 <div className="form-check">
                     <label className="form-check-label">
-                        <input type="radio" className="form-check-input" name={"maleFemaleRadios"+props.index}
-                               id={"femaleRadios"+props.index} value="true"/>
+                        <input type="radio" className="form-check-input" name={"maleFemaleRadios" + props.index}
+                               id={"femaleRadios" + props.index} value="true"/>
                         Female
                     </label>
                 </div>
