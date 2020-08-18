@@ -1,21 +1,21 @@
 import React from "react";
 import Tabs from 'react-bootstrap/Tabs'
 import Tab from 'react-bootstrap/Tab'
-import SummaryReport from "./summaryReport";
-import BreakdownReport from "./breakdownReport";
 import SavingsReport from "./savingsReport";
 import IncomeVsSpendingReport from "./incomeVsSpendingReport";
 import Report from "../model/report";
+// import SummaryReport from "./summaryReportForCouple";
+import SummaryReportForCouple from "./summaryReportForCouple";
 
-export default function TabbedRetirementReport(props) {
+function TabbedRetirementReport(props) {
 
     let report = new Report(props.report);
     
     return (
         <div>
-            <Tabs defaultActiveKey="highLevel" className="mx-0">
+            <Tabs defaultActiveKey="highLevel" className="mx-0 mt-2">
                 <Tab eventKey="highLevel" title="Summary">
-                    <SummaryReport report={props.report}/>
+                    <SummaryReportForCouple report={props.report}/>
                 </Tab>
                 <Tab eventKey="incomeVsSpendingReport" title="Income vs Spending">
                     <IncomeVsSpendingReport report={props.report} dob={props.dob}/>
@@ -30,5 +30,8 @@ export default function TabbedRetirementReport(props) {
         </div>
     );
 }
+
+export default React.memo(TabbedRetirementReport)
+
 
 

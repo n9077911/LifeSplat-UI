@@ -183,7 +183,7 @@ export default function RetirementCalculator() {
                 </form>
             </div>
             <div id="results" className="w-auto mt-3 mt-md-1 ml-1 md-ml-3">
-                {data.minimumPossibleRetirementAge ? <TabbedRetirementReport report={data} dob={submittedDob.current}/> : ''}
+                {data.person ? <TabbedRetirementReport report={data} dob={submittedDob.current}/> : ''}
                 {data.error ? data.error : ''}
             </div>
         </div>

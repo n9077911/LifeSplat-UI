@@ -5,7 +5,7 @@ export default function addDateBasedAnnotations(annotations, report) {
         return moment(report.bankruptDate).year() < 4000;
     }
 
-    let ageBased = '' //todo : extract as a user preference
+    let ageBased = 'true' //todo : extract as a user preference
 
     function message(ageBased, age, date) {
         if(ageBased === 'true')
@@ -16,15 +16,20 @@ export default function addDateBasedAnnotations(annotations, report) {
     }
 
     let privatePensionTime = message(ageBased, report.person[0].privateRetirementAge, report.person[0].privateRetirementDate) ;
-    let minRetirementTime = message(ageBased, report.minimumPossibleRetirementAge, report.minimumPossibleRetirementDate) ;
+    let minRetirementTime = message(ageBased, report.person[0].minimumPossibleRetirementAge, report.person[0].minimumPossibleRetirementDate) ;
     let statePensionTime = message(ageBased, report.person[0].stateRetirementAge, report.person[0].stateRetirementDate) ;
     let targetRetirementTime = message(ageBased, report.targetRetirementAge, report.targetRetirementDate) ;
     
     let newAnnotations = [
-        {axis: "x-axis-0", value: report.minimumPossibleRetirementDate, title: [wentBankrupt() ? 'Safe retirement' : 'You could retire', ...minRetirementTime], yShift: -50},
+        {axis: "x-axis-0", value: report.person[0].minimumPossibleRetirementDate, title: [wentBankrupt() ? 'Safe retirement' : 'You could retire', ...minRetirementTime], yShift: -50},
         {axis: "x-axis-0", value: report.person[0].privateRetirementDate, title: ['Private Pension', ...privatePensionTime], yShift: 0},
         {axis: "x-axis-0", value: report.person[0].stateRetirementDate, title: ['State Pension', ...statePensionTime], yShift: 0}]
 
+    if (report.person.length === 2)
+    {
+        newAnnotations.unshift({axis: "x-axis-0", value: report.person[1].privateRetirementDate, title: ['Partners', 'Private Pension'], yShift: -100})
+        newAnnotations.unshift({axis: "x-axis-0", value: report.person[1].stateRetirementDate, title: ['Partner', 'State Pension'], yShift: -100})
+    }
 
     if (report.targetRetirementAge) {
         newAnnotations.push({
@@ -34,8 +39,7 @@ export default function addDateBasedAnnotations(annotations, report) {
             yShift: -100
         })
     }
-
-
+    
     if (wentBankrupt()) {
         newAnnotations.push({
             axis: "x-axis-0",
