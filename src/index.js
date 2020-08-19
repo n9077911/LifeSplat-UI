@@ -13,7 +13,7 @@ class IncomeTax extends React.Component {
             <div className="container-fluid">
                 <div className="row">
                     <div className="ml-1 ml-md-3 mt-md-3 text-left">
-                        <h2>Projekt.me<small className="text-muted"> - Alpha 0.1</small></h2>
+                        <h2>Life Splat<small className="text-muted"> - Alpha 0.1</small></h2>
                     </div>
                 </div>
                 <RetirementCalculator>

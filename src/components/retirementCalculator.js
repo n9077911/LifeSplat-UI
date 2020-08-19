@@ -151,8 +151,13 @@ export default function RetirementCalculator() {
         }
     }
 
+    function reportHasRan() {
+        return typeof data.person !== 'undefined'
+    }
+
     return (
         <div id="formAndResults" className="row d-flex flex-column">
+            <div className={"ml-1 ml-md-3"}>{!reportHasRan() ? <InitialExplainer/> : ''}</div>
             <div id="form">
                 <form className="salaryForm ml-1 ml-md-3">
                     <div className='' style={{width: '95vw'}}>
@@ -182,12 +187,18 @@ export default function RetirementCalculator() {
                     </div>
                 </form>
             </div>
-            <div id="results" className="w-auto mt-3 mt-md-1 ml-1 md-ml-3">
-                {data.person ? <TabbedRetirementReport report={data} dob={submittedDob.current}/> : ''}
+            <div id="results" className="w-auto mt-3 ml-1 ml-md-3">
+                {reportHasRan() ? <TabbedRetirementReport report={data} dob={submittedDob.current}/> : ''}
                 {data.error ? data.error : ''}
             </div>
         </div>
     );
+}
+
+function InitialExplainer(props){
+    return <div className={"alert alert-primary"} style={{'max-width':'750px'}}>
+        <h2>Welcome!</h2><h4>Enter your details to calculate your earliest feasible retirement date.</h4>
+    </div>    
 }
 
 function PersonFormSection(props) {

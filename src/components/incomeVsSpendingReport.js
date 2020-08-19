@@ -18,7 +18,7 @@ function IncomeVsSpendingReport(props) {
         dataSets: [
             {
                 title: 'Salary',
-                color: 'OrangeRed',
+                color: 'Green',
                 data: steps.map((x, i) => positiveOrNull(report.salary(i)))
             },
             {
@@ -68,6 +68,13 @@ function IncomeVsSpendingReport(props) {
             data={incomeDataSets}
             title="Income"
             color="#70CAD1"/>
+        <div><h3>Above shows your monthly spending projected over your life.</h3><br/>
+            <p>The colours indicate where your income comes from. For example the green at the start of the chart represents your after tax salary.</p>
+            <p>Assuming you earn more than you spend you'll have money above the line which is available to be invested.</p>
+            <p>Colours stacked on top of each other show that your income can come from many places.</p>
+            <p>Where your income falls below your spending the chart assumes you'll make up the difference by dipping into your savings (bright orange)</p>
+            <p>If you run out of savings (whoops).. then I'm afriad you're bankrupt and the chart will show that.</p>
+        </div>
     </div>;
 }
 

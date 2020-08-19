@@ -13,7 +13,7 @@ function TabbedRetirementReport(props) {
     
     return (
         <div>
-            <Tabs defaultActiveKey="highLevel" className="mx-0 mt-2">
+            <Tabs defaultActiveKey="highLevel" className="mx-0">
                 <Tab eventKey="highLevel" title="Summary">
                     <SummaryReportForCouple report={props.report}/>
                 </Tab>
