@@ -8,7 +8,7 @@ import Report from "../model/report";
 function IncomeVsSpendingReport(props) {
 
     let steps = props.report.person[0].steps;
-    
+
     let report = new Report(props.report);
 
     let incomeDataSets = {
@@ -43,11 +43,9 @@ function IncomeVsSpendingReport(props) {
                 data: steps.map((x, i) => positiveOrNull(report.savingsSpentPreBankrupt(i)))
             },
         ],
-        annotations: [
-            {axis: "y-axis-0", value: props.report.monthlySpending, title: ['You spend', formatMoney(props.report.monthlySpending) + ' per month'], color: '#dc3545', position: 'left', xShift: 20, yShift: -10},
-        ]
+        annotations: []
     }
-    
+
     if (moment(props.report.bankruptDate).year() < 4000)
         incomeDataSets.dataSets.push(
             {
@@ -59,6 +57,17 @@ function IncomeVsSpendingReport(props) {
         )
 
     incomeDataSets.annotations = addDateBasedAnnotations(incomeDataSets.annotations, props.report)
+
+    incomeDataSets.annotations.unshift({
+            axis: "y-axis-0",
+            value: props.report.monthlySpending,
+            title: ['You spend', formatMoney(props.report.monthlySpending) + ' per month'],
+            color: '#dc3545',
+            position: 'left',
+            xShift: 20,
+            yShift: -10
+        }
+    )
 
     incomeDataSets.xAxesFormatCallback = (input) => moment(input).month() === props.dob.getMonth() ? moment(input).year() - props.dob.getFullYear() : ''
     incomeDataSets.yAxesFormatCallback = (input) => formatMoney(input)

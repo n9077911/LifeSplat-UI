@@ -21,7 +21,8 @@ export default function Report(report) {
 
     this.privatePensionGrowthToSpend = (x) => {
         let pension = this.people.map(p => {
-            if (moment(p.steps[x][this.dateIndex]).isAfter(p.privateRetirementDate)) {
+            let stepDate = moment(p.steps[x][this.dateIndex]);
+            if (stepDate.isSameOrAfter(p.privateRetirementDate) && stepDate.isSameOrAfter(p.minimumPossibleRetirementDate)) {
                 return p.steps[x][this.privatePensionGrowthIndex]
             } else {
                 return 0
@@ -30,7 +31,8 @@ export default function Report(report) {
 
     this.privatePensionPotLockedAway = (x) => {
         let pension = this.people.map(p => {
-            if (moment(p.steps[x][this.dateIndex]).isBefore(p.privateRetirementDate)) {
+            let stepDate = moment(p.steps[x][this.dateIndex]);
+            if (stepDate.isBefore(p.privateRetirementDate) || stepDate.isBefore(p.minimumPossibleRetirementDate)) {
                 return p.steps[x][this.privatePensionAmountIndex]
             } else {
                 return 0
@@ -39,7 +41,8 @@ export default function Report(report) {
 
     this.privatePensionPotAvailable = (x) => {
         let pension = this.people.map(p => {
-            if (moment(p.steps[x][this.dateIndex]).isSameOrAfter(p.privateRetirementDate)) {
+            let stepDate = moment(p.steps[x][this.dateIndex]);
+            if (stepDate.isSameOrAfter(p.privateRetirementDate) && stepDate.isSameOrAfter(p.minimumPossibleRetirementDate)) {
                 return p.steps[x][this.privatePensionAmountIndex]
             } else {
                 return 0
