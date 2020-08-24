@@ -28,7 +28,7 @@ export default function RetirementCalculator() {
     function requestBody(persons, spending, targetRetirementAge) {
         persons = persons.map((p) => {
             let personDto = {
-                spending: spending / persons.length,
+                spending: parseInt(spending || 0) / persons.length,
                 salary: parseInt(p.salary || 0),
                 savings: parseInt(p.savings || 0),
                 pension: parseInt(p.pension || 0),

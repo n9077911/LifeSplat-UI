@@ -72,19 +72,31 @@ function IncomeVsSpendingReport(props) {
     incomeDataSets.xAxesFormatCallback = (input) => moment(input).month() === props.dob.getMonth() ? moment(input).year() - props.dob.getFullYear() : ''
     incomeDataSets.yAxesFormatCallback = (input) => formatMoney(input)
 
+    function calcMinimumMessage(report) {
+        return report.calcMinimumMode()
+            ? <li className="mt-2 lead">Life Splat assumes you'll quit work on the earliest possible date. Add a target retirement age if you plan to continue working.</li>
+        :  ''
+    }
+
     return <div>
-        <AreaChart
-            data={incomeDataSets}
-            title="Income"
-            color="#70CAD1"/>
-        <div><h3>Above shows your monthly spending projected over your life.</h3><br/>
-            <p>The colours indicate where your income comes from. For example the green at the start of the chart represents your after tax salary.</p>
-            <p>Assuming you earn more than you spend you'll have money above the line which is available to be invested.</p>
-            <p>Colours stacked on top of each other show that your income can come from many places.</p>
-            <p>Where your income falls below your spending the chart assumes you'll make up the difference by dipping into your savings (bright orange)</p>
-            <p>If you run out of savings (whoops).. then I'm afriad you're bankrupt and the chart will show that.</p>
-        </div>
-    </div>;
+            <div>
+            <AreaChart
+                data={incomeDataSets}
+                title="Income"
+                color="#70CAD1"/>
+            </div>
+            <div style={{'width':'90vw'}}>
+                <ul>
+                    <li className="mt-2 lead">Shows your monthly income and spending projected over your life.</li>
+                    {calcMinimumMessage(report)}
+                    <li className="mt-2 lead">The colour indicate where your income comes from. For example the green at the start of the chart represents your monthly after tax salary.</li>
+                    <li className="mt-2 lead">Assuming you earn more than you spend you'll have money above the line which is available to be invested.</li>
+                    <li className="mt-2 lead">Colours stacked on top of each other show that your income can come from many places.</li>
+                    <li className="mt-2 lead">Where your income falls below your spending Life Splat assumes you'll make up the difference by dipping into your savings (orange)</li>
+                    <li className="mt-2 lead">If you run out of savings (whoops).. then I'm afriad you're bankrupt and the chart will show that.</li>
+                </ul>
+            </div>
+        </div>;
 }
 
 export default React.memo(IncomeVsSpendingReport)

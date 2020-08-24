@@ -6,6 +6,7 @@ import IncomeVsSpendingReport from "./incomeVsSpendingReport";
 import Report from "../model/report";
 // import SummaryReport from "./summaryReportForCouple";
 import SummaryReportForCouple from "./summaryReportForCouple";
+import Assumptions from "./assumptions";
 
 function TabbedRetirementReport(props) {
 
@@ -22,6 +23,9 @@ function TabbedRetirementReport(props) {
                 </Tab>
                 <Tab eventKey="savingsReport" title="Savings">
                     <SavingsReport report={report} dob={props.dob}/>
+                </Tab>
+                <Tab eventKey="assumptionsReport" title="Assumptions">
+                    <Assumptions report={report} dob={props.dob}/>
                 </Tab>
                 {/*<Tab eventKey="numbers" title="Debug">*/}
                 {/*    <BreakdownReport report={props.report}/>*/}

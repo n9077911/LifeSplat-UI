@@ -35,7 +35,7 @@ export default function SummaryReportForCouple(props) {
     }
 
     function combined(partner) {
-        return <div> {partner ? 'combined ' : ''}</div>;
+        return <span> {partner ? 'combined ' : ''}</span>;
     }
 
     function getPersonReport(report, person, partner) {
@@ -50,7 +50,7 @@ export default function SummaryReportForCouple(props) {
                 className="text-big text-success">{person.privateRetirementAge}</span></li>
             <li className="mt-2">{Your(partner)} private pension pot might be &nbsp;<span className="text-big text-success">{formatMoney(person.privatePensionPot)}</span>, which gives an annual
                 income of &nbsp;<span className="text-big text-success">{formatMoney(person.privatePensionSafeWithdrawal)}</span></li>
-            <li className="mt-2">Your combined total savings at private retirement age are &nbsp;<span
+            <li className="mt-2">Your {combined(partner)}total savings at private retirement age are &nbsp;<span
                 className="text-big text-success">{formatMoney(person.privatePensionPotCombinedAtPrivatePensionAge + person.savingsCombinedAtPrivatePensionAge)}</span></li>
             <li className="mt-2">Your {combined(partner)}total savings at state retirement age are &nbsp;<span
                 className="text-big text-success">{formatMoney(person.privatePensionPotCombinedAtStatePensionAge + person.savingsCombinedAtStatePensionAge)}</span></li>

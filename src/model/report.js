@@ -64,6 +64,8 @@ export default function Report(report) {
     this.savingsSpent = (x) => this.rawReport.monthlySpending - this.statePension(x) - this.privatePensionGrowthToSpend(x) - this.investmentGrowth(x) - this.salary(x);
 
     this.stepDates = () => this.rawReport.person[0].steps.map(x => x[this.dateIndex])
+    
+    this.calcMinimumMode = () => this.rawReport.targetRetirementDate === null
 
     let sumForIndex = (x) => (index) => {
         return sum(this.people.map(p => p.steps[x][index]))
