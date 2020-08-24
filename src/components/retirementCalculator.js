@@ -13,13 +13,13 @@ export default function RetirementCalculator() {
     const [targetRetirementAge, setTargetRetirementAge] = useState('')
 
     //dev
-    const [spending, setSpending] = useState(20_000)
-    const [persons, setPersons] = useState([{salary: "50000", savings: "50000", pension: "50000", employerContribution: "3", employeeContribution: "5", female: false, dob: new Date(1981, 4, 1)}])
+    // const [spending, setSpending] = useState(20_000)
+    // const [persons, setPersons] = useState([{salary: "50000", savings: "50000", pension: "50000", employerContribution: "3", employeeContribution: "5", female: false, dob: new Date(1981, 4, 1)}])
     const url = "https://localhost:5001/api/Retirement/Report"
 
     //deploy
-    // const [spending, setSpending] = useState('')
-    // const [persons, setPersons] = useState([{employerContribution: "3", employeeContribution: "5", dob: new Date(1980, 0, 1)}])
+    const [spending, setSpending] = useState('')
+    const [persons, setPersons] = useState([{employerContribution: "3", employeeContribution: "5", dob: new Date(1980, 0, 1)}])
     // const url = "https://sctaxcalcservice.azurewebsites.net/api/Retirement/Report"
 
     const submittedDob = useRef(persons[0].dob);
@@ -169,9 +169,9 @@ export default function RetirementCalculator() {
 
     return (
         <div id="formAndResults" className="row d-flex flex-column">
-            <div className={"ml-1 ml-md-3"}>{!reportHasRan() ? <InitialExplainer/> : ''}</div>
+            <div className={"mx-1 mx-md-3"}>{!reportHasRan() ? <InitialExplainer/> : ''}</div>
             <div id="form">
-                <form className="salaryForm ml-1 ml-md-3">
+                <form className="salaryForm mx-1 mx-md-3">
                     <div className='' style={{width: '95vw'}}>
                         <div id="formComponents" className="d-flex-column flex-wrap">
                             <div className="d-flex">
@@ -227,10 +227,10 @@ const savingsPopOver = <div><h5>Your total savings including investments e.g. ca
 const pensionPopOver = <div><h5>The total cash value of your existing private pensions.</h5></div>
 
 const employerContributionPopOver = <div><h5>The amount your employer contributes to your pension as a % or your salary</h5>
-                                    <hr/><h5>3% is the minimum under auto enrollment</h5></div>
+                                    <hr/><h5>3% is the minimum under auto enrollment, unless you opted out.</h5></div>
 
 const employeeContributionPopOver = <div><h5>The amount you contribute to your pension as a % or your salary</h5>
-                                    <hr/><h5>5% is the minimum under auto enrollment</h5></div>
+                                    <hr/><h5>5% is the minimum under auto enrollment, unless you opted out.</h5></div>
 
 const contributingYearsPopOver = <div><h5><strong>Optional:</strong> The number of qualifying years you have accrued towards your state pension.</h5><hr/>
     <h5>Leave blank to let LifeSplat estimate your contributions. LifeSplat will assume you've been contributing from age 21.</h5></div>
