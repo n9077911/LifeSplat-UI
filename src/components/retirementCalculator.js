@@ -315,7 +315,7 @@ function FormInput(props) {
                     <span className="input-group-prepend input-group-text">{props.prepend}</span>
                 </div>
                 : ''}
-            <OverlayTrigger trigger="focus" placement="bottom" overlay={Pop(props.popOver)}>
+            <OverlayTrigger trigger="focus" placement="top" popperConfig={{modifiers:[{name:'offset',options:{offset:[0,20]}}]}} overlay={Pop(props.popOver)}>
                 <input type="text" placeholder={props.placeHolder}
                    className={"form-control " + (props.error ? "is-invalid" : "")}
                    onChange={props.handleChange}
