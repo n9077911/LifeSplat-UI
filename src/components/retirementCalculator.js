@@ -1,3 +1,11 @@
+//run a spell checker.
+//enter monthly
+//clarify that everything saved is assumed to be invested
+//add cash savings
+//review testing
+//when bankrupt but no retirement date given it should say bankrupt.
+//when bankrupt it still displays a chart -- but its not that clear -perhaps just show red from then on.
+
 import React, {useCallback, useRef, useState} from 'react';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -15,12 +23,14 @@ export default function RetirementCalculator() {
     //dev
     // const [spending, setSpending] = useState(20_000)
     // const [persons, setPersons] = useState([{salary: "50000", savings: "50000", pension: "50000", employerContribution: "3", employeeContribution: "5", female: false, dob: new Date(1981, 4, 1)}])
-    const url = "https://localhost:5001/api/Retirement/Report"
+    // const url = "https://localhost:5001/api/Retirement/Report"
 
     //deploy
     const [spending, setSpending] = useState('')
     const [persons, setPersons] = useState([{employerContribution: "3", employeeContribution: "5", dob: new Date(1980, 0, 1)}])
     // const url = "https://sctaxcalcservice.azurewebsites.net/api/Retirement/Report"
+    const url = "https://lifesplatservice.co.uk/api/Retirement/Report"
+    
 
     const submittedDob = useRef(persons[0].dob);
     const fullyCalcd = useRef(true);
