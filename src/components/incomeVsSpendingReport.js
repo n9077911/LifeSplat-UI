@@ -93,7 +93,7 @@ function IncomeVsSpendingReport(props) {
                     <li className="mt-2 lead">Assuming you earn more than you spend you'll have money above the line which is available to be invested.</li>
                     <li className="mt-2 lead">Colours stacked on top of each other show that your income can come from many places.</li>
                     <li className="mt-2 lead">Where your income falls below your spending Life Splat assumes you'll make up the difference by dipping into your savings (orange)</li>
-                    <li className="mt-2 lead">If your income falls below your spending and you've ran out of savings (whoops).. then I'm afriad you're bankrupt and the chart will show that.</li>
+                    <li className="mt-2 lead">If your income falls below your spending and you've ran out of savings (whoops).. then I'm afraid you're bankrupt and the chart will show that.</li>
                 </ul>
             </div>
         </div>;

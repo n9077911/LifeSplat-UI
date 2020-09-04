@@ -69,8 +69,8 @@ export default function RetirementCalculator() {
             referrerPolicy: 'no-referrer',
             body: JSON.stringify(requestBody(persons, parseInt(spending), targetRetirementAge))
         })
-            .then((resp) => {
-                return resp.json()
+            .then((response) => {
+                return response.json()
             })
             .then((data) => {
                 fullyCalcd.current = true;
@@ -231,16 +231,16 @@ const targetRetirementAgePopOver = <div><h5><strong>Optional:</strong> The date 
 const salaryPopOver = <div><h5>Your pre tax annual salary</h5></div>
 
 const savingsPopOver = <div><h5>Your total savings including investments e.g. cash, shares, bonds, funds, bitcoin, gold, rental property</h5><hr/>
-                            <h5>Include anything that is easily convertible into money and that you own specifcally as a store of wealth or to earn a profit.</h5><hr/>
+                            <h5>Include anything that is easily convertible into money and that you own specifically as a store of wealth or to earn a profit.</h5><hr/>
                             <h5>For rental property include the cash value you would receive should you sell it i.e. minus mortgage repayment and other expenses</h5></div>
 
 const pensionPopOver = <div><h5>The total cash value of your existing private pensions.</h5></div>
 
 const employerContributionPopOver = <div><h5>The amount your employer contributes to your pension as a % or your salary</h5>
-                                    <hr/><h5>3% is the minimum under auto enrollment, unless you opted out.</h5></div>
+                                    <hr/><h5>3% is the minimum under auto enrolment, unless you opted out.</h5></div>
 
 const employeeContributionPopOver = <div><h5>The amount you contribute to your pension as a % or your salary</h5>
-                                    <hr/><h5>5% is the minimum under auto enrollment, unless you opted out.</h5></div>
+                                    <hr/><h5>5% is the minimum under auto enrolment, unless you opted out.</h5></div>
 
 const contributingYearsPopOver = <div><h5><strong>Optional:</strong> The number of qualifying years you have accrued towards your state pension.</h5><hr/>
     <h5>Leave blank to let LifeSplat estimate your contributions. LifeSplat will assume you've been contributing from age 21.</h5></div>

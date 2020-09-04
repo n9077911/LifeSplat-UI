@@ -1,7 +1,3 @@
-.salaryForm {
-  /*max-width: 190px;*/
-}
-
 .reportTotal {
   background-color: darkgray;
 }
@@ -31,8 +27,6 @@
   position: relative;
   width:90vw;
   min-width: 1000px;
-  /*margin: auto;*/
-  /*width:2000px;*/
 }
 
 

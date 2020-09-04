@@ -4,7 +4,6 @@ import Tab from 'react-bootstrap/Tab'
 import SavingsReport from "./savingsReport";
 import IncomeVsSpendingReport from "./incomeVsSpendingReport";
 import Report from "../model/report";
-// import SummaryReport from "./summaryReportForCouple";
 import SummaryReportForCouple from "./summaryReportForCouple";
 import Assumptions from "./assumptions";
 

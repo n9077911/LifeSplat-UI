@@ -9,9 +9,9 @@ function Assumptions(props) {
                     <li className="mt-2 lead">Your're comfortable with your savings running out at age 100.</li>
                     <li className="mt-2 lead">All savings are invested and earn a return of 4%.</li>
                     <li className="mt-2 lead">All investments are held in tax free accounts e.g. ISAs</li>
-                    <li className="mt-2 lead">Inflation: Currenlty inflation is ignored.
+                    <li className="mt-2 lead">Inflation: Currently inflation is ignored.
                         <ul>
-                            <li>All numbers can be thought of in todays terms.</li>
+                            <li>All numbers can be thought of in today's terms.</li>
                             <li>The 4% return from investments already factors in inflation, your real return is likely to be 6-7%.</li>
                             <li>Although your spending will increase your income is likely to increase also.</li>
                             <li>The state pension is currently inflation protected (unless you retire in a country which doens't have an inflation agreement with the UK).</li>
