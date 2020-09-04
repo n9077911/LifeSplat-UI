@@ -1,3 +1,5 @@
+import 'react-app-polyfill/ie11';
+import 'react-app-polyfill/stable';
 import React from "react";
 import ReactDOM from "react-dom";
 import 'bootswatch/dist/darkly/bootstrap.min.css';
@@ -7,8 +9,6 @@ import RetirementCalculator from "./components/retirementCalculator";
 
 class IncomeTax extends React.Component {
     render() {
-        document.body.style = "background: #222;";
-        
         return (
             <div className="container-fluid">
                 <div className="row">

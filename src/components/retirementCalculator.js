@@ -27,8 +27,8 @@ export default function RetirementCalculator() {
     //deploy
     const [spending, setSpending] = useState('')
     const [persons, setPersons] = useState([{employerContribution: "3", employeeContribution: "5", dob: new Date(1980, 0, 1)}])
-    // const url = "https://sctaxcalcservice.azurewebsites.net/api/Retirement/Report"
-    const url = "https://lifesplatservice.co.uk/api/Retirement/Report"
+    const url = "https://sctaxcalcservice.azurewebsites.net/api/Retirement/Report"
+    // const url = "https://lifesplatservice.co.uk/api/Retirement/Report"
     
 
     const submittedDob = useRef(persons[0].dob);
