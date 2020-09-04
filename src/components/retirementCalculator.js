@@ -1,4 +1,3 @@
-//run a spell checker.
 //enter monthly
 //clarify that everything saved is assumed to be invested
 //add cash savings
