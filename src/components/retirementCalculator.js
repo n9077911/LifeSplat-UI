@@ -218,7 +218,7 @@ export default function RetirementCalculator() {
 
 function InitialExplainer(props){
     return <div className={"alert alert-primary"} style={{'max-width':'750px'}}>
-        <h2>DELPOYMENT: Welcome!</h2><h4>Enter your details to calculate your earliest feasible retirement date.</h4>
+        <h2>Welcome!</h2><h4>Enter your details to calculate your earliest feasible retirement date.</h4>
     </div>    
 }
 
