@@ -10,6 +10,7 @@
     "bootswatch": "^4.5.0",
     "chart.js": "^2.9.3",
     "chartjs-plugin-annotation": "git+https://github.com/chartjs/chartjs-plugin-annotation.git",
+    "env-cmd": "^10.1.0",
     "immutability-helper": "^3.1.1",
     "moment": "^2.27.0",
     "react": "^16.13.1",
@@ -21,8 +22,9 @@
     "react-scripts": "3.4.1"
   },
   "scripts": {
-    "start": "set HTTPS=true&&react-scripts start",
-    "build": "react-scripts build",
+    "start": "set HTTPS=true&&set REACT_APP_ENV=dev&&react-scripts start",
+    "build:staging": "set REACT_APP_ENV=staging&&react-scripts build",
+    "build": "set REACT_APP_ENV=live&&react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
