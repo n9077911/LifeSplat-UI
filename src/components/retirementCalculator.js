@@ -4,7 +4,7 @@
 //add cash savings
 //review testing
 //when bankrupt but no retirement date given it should say bankrupt.
-//when bankrupt it still displays a chart -- but its not that clear -perhaps just show red from then on.
+//when bankrupt it still displays a chart -- but its not that clear -perhaps just show red from then on
 
 import React, {useCallback, useRef, useState} from 'react';
 import DatePicker from "react-datepicker";
