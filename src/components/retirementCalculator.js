@@ -22,13 +22,13 @@ export default function RetirementCalculator() {
     //dev
     // const [spending, setSpending] = useState(20_000)
     // const [persons, setPersons] = useState([{salary: "50000", savings: "50000", pension: "50000", employerContribution: "3", employeeContribution: "5", female: false, dob: new Date(1981, 4, 1)}])
-    // const url = "https://localhost:5001/api/Retirement/Report"
 
     //deploy
     const [spending, setSpending] = useState('')
     const [persons, setPersons] = useState([{employerContribution: "3", employeeContribution: "5", dob: new Date(1980, 0, 1)}])
-    const url = "https://sctaxcalcservice.azurewebsites.net/api/Retirement/Report"
-    // const url = "https://lifesplatservice.co.uk/api/Retirement/Report"
+    // const url = "https://localhost:5001/api/Retirement/Report"
+    // const url = "https://sctaxcalcservice.azurewebsites.net/api/Retirement/Report"
+    const url = process.env.REACT_APP_SERVICE_URL
     
 
     const submittedDob = useRef(persons[0].dob);
