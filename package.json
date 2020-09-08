@@ -22,9 +22,9 @@
     "react-scripts": "3.4.1"
   },
   "scripts": {
-    "start": "env-cmd -f .env.dev react-scripts start",
+    "start": "react-scripts start",
     "build:staging": "env-cmd -f .env.staging react-scripts build",
-    "build": "env-cmd -f .env.production react-scripts build",
+    "build:production": "env-cmd -f .env.production react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

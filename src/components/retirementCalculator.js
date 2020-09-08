@@ -19,17 +19,20 @@ export default function RetirementCalculator() {
     const [personErrors, setPersonErrors] = useState([{}])
     const [targetRetirementAge, setTargetRetirementAge] = useState('')
 
-    //dev
-    // const [spending, setSpending] = useState(20_000)
-    // const [persons, setPersons] = useState([{salary: "50000", savings: "50000", pension: "50000", employerContribution: "3", employeeContribution: "5", female: false, dob: new Date(1981, 4, 1)}])
+    let spendingVar, salary, savings, pension = ""
+    let url = process.env.REACT_APP_SERVICE_URL;
 
-    //deploy
-    const [spending, setSpending] = useState('')
-    const [persons, setPersons] = useState([{employerContribution: "3", employeeContribution: "5", dob: new Date(1980, 0, 1)}])
-    // const url = "https://localhost:5001/api/Retirement/Report"
-    // const url = "https://sctaxcalcservice.azurewebsites.net/api/Retirement/Report"
-    const url = process.env.REACT_APP_SERVICE_URL
+    if(!process.env.REACT_APP_ENV) //dev
+    {
+        spendingVar = "20000"
+        salary = "50000"
+        savings = "50000"
+        pension = "50000"
+        url = "https://localhost:5001/api/Retirement/Report"
+    }
     
+    const [spending, setSpending] = useState(spendingVar)
+    const [persons, setPersons] = useState([{salary: salary, savings: savings, pension: pension, employerContribution: "3", employeeContribution: "5", female: false, dob: new Date(1981, 4, 1)}])
 
     const submittedDob = useRef(persons[0].dob);
     const fullyCalcd = useRef(true);
@@ -58,6 +61,9 @@ export default function RetirementCalculator() {
     }
 
     const loadReportFromServer = useCallback(() => {
+        let body = JSON.stringify(requestBody(persons, parseInt(spending), targetRetirementAge));
+        console.log(body)
+        console.log(url)
         fetch(url, {
             method: 'POST',
             accept: 'application/json',
@@ -66,7 +72,7 @@ export default function RetirementCalculator() {
             headers: {},
             redirect: 'follow',
             referrerPolicy: 'no-referrer',
-            body: JSON.stringify(requestBody(persons, parseInt(spending), targetRetirementAge))
+            body: body
         })
             .then((response) => {
                 return response.json()
@@ -80,7 +86,7 @@ export default function RetirementCalculator() {
                     setData({error: reason.toString()})
                 }
             )
-    }, [spending, targetRetirementAge, persons])
+    }, [spending, targetRetirementAge, persons, url])
 
     function handleSubmit(event) {
         loadReportFromServer();
