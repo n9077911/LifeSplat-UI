@@ -7,7 +7,7 @@ function Assumptions(props) {
             <div className="mt-3" style={{'width':'90vw'}}>
                 <ul>
                     <li className="mt-2 lead">All savings are invested and earn a return of 4%.</li>
-                    <li className="mt-2 lead">You're comfortable with your savings running out at age 100.</li>
+                    <li className="mt-2 lead">Your minimum retirement is based on your savings running out at age 100.</li>
                     <li className="mt-2 lead">All investments are held in tax free accounts e.g. ISAs</li>
                     <li className="mt-2 lead">Inflation: Currently inflation is ignored.
                         <ul>
