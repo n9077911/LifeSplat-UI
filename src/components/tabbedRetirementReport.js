@@ -20,7 +20,7 @@ function TabbedRetirementReport(props) {
                 <Tab eventKey="incomeVsSpendingReport" title="Income vs Spending">
                     <IncomeVsSpendingReport report={props.report} dob={props.dob}/>
                 </Tab>
-                <Tab eventKey="savingsReport" title="Savings">
+                <Tab eventKey="savingsReport" title="Investments">
                     <SavingsReport report={report} dob={props.dob}/>
                 </Tab>
                 <Tab eventKey="assumptionsReport" title="Assumptions">
