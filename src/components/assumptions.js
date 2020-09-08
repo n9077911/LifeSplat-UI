@@ -17,6 +17,7 @@ function Assumptions(props) {
                             <li>The state pension is currently inflation protected (unless you retire in a country which doens't have an inflation agreement with the UK).</li>
                         </ul>
                     </li>
+                    <li className="mt-2 lead">Your pension doesn't exceed the <a href="https://www.gov.uk/tax-on-your-private-pension/lifetime-allowance">Life Time Allowance</a>.</li>
                     <li className="mt-2 lead">Your salary remains constant.</li>
                     <li className="mt-2 lead">Your spending remains constant.</li>
                     <li className="mt-2 lead">The tax system remains constant.</li>

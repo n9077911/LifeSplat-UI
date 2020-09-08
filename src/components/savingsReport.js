@@ -14,7 +14,7 @@ export default function SavingsReport(props) {
         xAxisLabels: stepDates,
         dataSets: [
             {
-                title: 'Savings',
+                title: 'Investments',
                 color: 'LightCyan',
                 step: false,
                 data: stepDates.map((x, i)=> positiveOrNull(props.report.savings(i)))
