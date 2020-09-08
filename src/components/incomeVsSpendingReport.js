@@ -37,7 +37,7 @@ function IncomeVsSpendingReport(props) {
                 data: steps.map((x, i) => positiveOrNull(report.investmentGrowth(i)))
             },
             {
-                title: 'Investments',
+                title: 'Investment Capital',
                 color: 'orange',
                 fill: 'origin',
                 data: steps.map((x, i) => positiveOrNull(report.savingsSpentPreBankrupt(i)))
