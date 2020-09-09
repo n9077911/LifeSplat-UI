@@ -44,8 +44,8 @@ export default function RetirementCalculator() {
                 salary: parseInt(p.salary || 0),
                 savings: parseInt(p.savings || 0),
                 pension: parseInt(p.pension || 0),
-                employerContribution: parseInt(p.employerContribution || 0),
-                employeeContribution: parseInt(p.employeeContribution || 0),
+                employerContribution: parseFloat(p.employerContribution || 0),
+                employeeContribution: parseFloat(p.employeeContribution || 0),
                 female: p.female,
                 dob: p.dob
             };
@@ -130,8 +130,8 @@ export default function RetirementCalculator() {
     let handleSalaryChange = (personIndex) => (event) => handleNumberChange(event, personIndex, 'salary')
     let handleSavingsChange = (personIndex) => (event) => handleNumberChange(event, personIndex, 'savings')
     let handlePensionChange = (personIndex) => (event) => handleNumberChange(event, personIndex, 'pension')
-    let handleEmployerContributionChange = (personIndex) => (event) => handleNumberChange(event, personIndex, 'employerContribution')
-    let handleEmployeeContributionChange = (personIndex) => (event) => handleNumberChange(event, personIndex, 'employeeContribution')
+    let handleEmployerContributionChange = (personIndex) => (event) => handleDecimalNumberChange(event, personIndex, 'employerContribution')
+    let handleEmployeeContributionChange = (personIndex) => (event) => handleDecimalNumberChange(event, personIndex, 'employeeContribution')
     let handleNiContributingYears = (personIndex) => (event) => handleNumberChange(event, personIndex, 'niContributingYears')
     
     let handleMaleFemale = (personIndex) => (event) => {
@@ -150,6 +150,13 @@ export default function RetirementCalculator() {
         else
             setPersonErrors(update(personErrors, {[personIndex]: {[fieldName]: {$set: ""}}}))
     }
+    
+    function setPersonErrorForDecimal(event, personIndex, fieldName) {
+        if (event.target.value && !event.target.value.match(/^\d+(\.\d{0,2})?$/))
+            setPersonErrors(update(personErrors, {[personIndex]: {[fieldName]: {$set: "Not a number"}}}))
+        else
+            setPersonErrors(update(personErrors, {[personIndex]: {[fieldName]: {$set: ""}}}))
+    }
 
     function setErrorForNumber(event, fieldName) {
         if (event.target.value && !event.target.value.match(/^\d+$/))
@@ -161,6 +168,13 @@ export default function RetirementCalculator() {
     function handleNumberChange(event, personIndex, fieldName) {
         setStale();
         setPersonErrorForNumber(event, personIndex, fieldName);
+        let updatedPerson = update(persons, {[personIndex]: {[fieldName]: {$set: event.target.value}}});
+        setPersons(updatedPerson);
+    }
+    
+    function handleDecimalNumberChange(event, personIndex, fieldName) {
+        setStale();
+        setPersonErrorForDecimal(event, personIndex, fieldName);
         let updatedPerson = update(persons, {[personIndex]: {[fieldName]: {$set: event.target.value}}});
         setPersons(updatedPerson);
     }
@@ -298,7 +312,7 @@ function FormGroupLabel(props) {
 
 
 function FormInputPercent(props) {
-    let error = 'Must be a single digit.';
+    let error = 'Must be a decimal.';
     return <FormInput error={props.error} handleChange={props.handleChange} value={props.value} errorMessage={error} append={'%'}
                       inputClass="input-control-percent" popOver={props.popOver}>
         {props.children}

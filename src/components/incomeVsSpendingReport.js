@@ -37,7 +37,7 @@ function IncomeVsSpendingReport(props) {
                 data: steps.map((x, i) => positiveOrNull(report.investmentGrowth(i)))
             },
             {
-                title: 'Savings',
+                title: 'Investment Capital',
                 color: 'orange',
                 fill: 'origin',
                 data: steps.map((x, i) => positiveOrNull(report.savingsSpentPreBankrupt(i)))
@@ -74,7 +74,7 @@ function IncomeVsSpendingReport(props) {
 
     function calcMinimumMessage(report) {
         return report.calcMinimumMode()
-            ? <li className="mt-2 lead">Life Splat assumes you'll quit work on the earliest possible date. Add a target retirement age if you plan to continue working.</li>
+            ? <li className="mt-2 lead">LifeSplat assumes you'll quit work on the earliest possible date. Add a target retirement age if you plan to continue working.</li>
         :  ''
     }
 
@@ -92,7 +92,7 @@ function IncomeVsSpendingReport(props) {
                     <li className="mt-2 lead">The colours indicate where your income comes from. For example the green at the start of the chart represents your monthly after tax salary.</li>
                     <li className="mt-2 lead">Assuming you earn more than you spend you'll have money above the line which is available to be invested.</li>
                     <li className="mt-2 lead">Colours stacked on top of each other show that your income can come from many places.</li>
-                    <li className="mt-2 lead">Where your income falls below your spending Life Splat assumes you'll make up the difference by dipping into your savings (orange)</li>
+                    <li className="mt-2 lead">Where your income falls below your spending LifeSplat assumes you'll make up the difference by selling your investments (orange)</li>
                     <li className="mt-2 lead">If your income falls below your spending and you've ran out of savings (whoops).. then I'm afraid you're bankrupt and the chart will show that.</li>
                 </ul>
             </div>
