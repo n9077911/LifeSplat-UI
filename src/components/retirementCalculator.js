@@ -12,6 +12,7 @@ import TabbedRetirementReport from "./tabbedRetirementReport";
 import update from 'immutability-helper';
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
+import moment from "moment";
 
 export default function RetirementCalculator() {
     const [data, setData] = useState({})
@@ -40,7 +41,6 @@ export default function RetirementCalculator() {
     function requestBody(persons, spending, targetRetirementAge) {
         persons = persons.map((p) => {
             let personDto = {
-                spending: parseInt(spending || 0) / persons.length,
                 salary: parseInt(p.salary || 0),
                 savings: parseInt(p.savings || 0),
                 pension: parseInt(p.pension || 0),
@@ -56,14 +56,13 @@ export default function RetirementCalculator() {
 
         return {
             targetRetirementAge: targetRetirementAge === '' ? 0 : parseInt(targetRetirementAge),
-            persons: persons
+            persons: persons,
+            spendingSteps: [{date: moment().toDate(), amount: parseInt(spending || 0)}, {date: moment().add(10, 'years').toDate(), amount: 15000}],
         }
     }
 
     const loadReportFromServer = useCallback(() => {
         let body = JSON.stringify(requestBody(persons, parseInt(spending), targetRetirementAge));
-        console.log(body)
-        console.log(url)
         fetch(url, {
             method: 'POST',
             accept: 'application/json',

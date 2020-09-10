@@ -2,7 +2,7 @@ import moment from "moment";
 import {formatMoney, positiveOrNull} from "../helpers";
 import AreaChart from "./charts/areaChart";
 import React from "react";
-import addDateBasedAnnotations from "../dateBasedAnnotations";
+import dateBasedAnnotations from "../dateBasedAnnotations";
 import Report from "../model/report";
 
 function IncomeVsSpendingReport(props) {
@@ -56,18 +56,10 @@ function IncomeVsSpendingReport(props) {
             }
         )
 
-    incomeDataSets.annotations = addDateBasedAnnotations(incomeDataSets.annotations, props.report)
+    let dateBasedAnnotation = dateBasedAnnotations(props.report)
+    let spendingAnnotations = spendingBasedAnnotations(report)
 
-    incomeDataSets.annotations.unshift({
-            axis: "y-axis-0",
-            value: props.report.monthlySpending,
-            title: ['You spend', formatMoney(props.report.monthlySpending) + ' per month'],
-            color: '#dc3545',
-            position: 'left',
-            xShift: 20,
-            yShift: -10
-        }
-    )
+    incomeDataSets.annotations = spendingAnnotations.concat(dateBasedAnnotation)
 
     incomeDataSets.xAxesFormatCallback = (input) => moment(input).month() === props.dob.getMonth() ? moment(input).year() - props.dob.getFullYear() : ''
     incomeDataSets.yAxesFormatCallback = (input) => formatMoney(input)
@@ -101,3 +93,25 @@ function IncomeVsSpendingReport(props) {
 
 export default React.memo(IncomeVsSpendingReport)
 
+function spendingBasedAnnotations(report) {
+    let spendingSteps = report.spendingSteps();
+    let firstStep = spendingSteps.shift();
+    let spendingAnnotations = [spendingAnnotation(firstStep, ['You spend', formatMoney(firstStep.spending / 12) + ' per month'])]
+    return spendingAnnotations.concat(spendingSteps.map((x) => spendingAnnotation(x, [formatMoney(x.spending / 12), ' per month'])))
+}
+
+function spendingAnnotation(spendingStep, title) {
+    return {
+        axis: "y-axis-0",
+        value: spendingStep.spending/12,
+        title: title,
+        color: '#dc3545',
+        position: 'left',
+        xShift: 20,
+        yShift: -10,
+        start: 20,
+        xScale: 'x-axis-0',
+        xMin: moment(spendingStep.startDate).add(-1, 'months').toDate(),
+        xMax: moment(spendingStep.endDate).add(-1, 'months').toDate(),
+    }
+}

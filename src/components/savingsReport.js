@@ -1,6 +1,6 @@
 import AreaChart from "./charts/areaChart";
 import React from "react";
-import addDateBasedAnnotations from "../dateBasedAnnotations";
+import dateBasedAnnotations from "../dateBasedAnnotations";
 import moment from "moment";
 import {formatMoney, positiveOrNull} from "../helpers";
 
@@ -34,7 +34,7 @@ export default function SavingsReport(props) {
         ],
     }
 
-    incomeDataSets.annotations = addDateBasedAnnotations(incomeDataSets.annotations, props.report.rawReport)
+    incomeDataSets.annotations = dateBasedAnnotations(props.report.rawReport)
 
     incomeDataSets.xAxesFormatCallback = (input) => moment(input).month() === props.dob.getMonth() ? moment(input).year() - props.dob.getFullYear() : ''
     incomeDataSets.yAxesFormatCallback = (input) => formatMoney(input)
