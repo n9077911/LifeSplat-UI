@@ -25,12 +25,17 @@ function AreaChart(props) {
         let annotations = props.data.annotations && props.data.annotations.map(a => {
             return {
                 drawTime: 'afterDatasetsDraw',
-                type: 'line',
+                type: a.type || 'line',
                 mode: a.axis.startsWith('x') ? 'vertical' : 'horizontal',
                 scaleID: a.axis,
+                xScaleID: a.xScale,
                 value: a.value,
                 borderColor: a.color || '#28a745',
                 borderWidth: 6,
+                xMin: a.xMin,
+                xMax: a.xMax,
+                yMin: a.yMin,
+                yMax: a.yMax,
                 label: {
                     yAdjust: a.yShift || 0,
                     xAdjust: a.xShift || 0,

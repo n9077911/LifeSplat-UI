@@ -1,11 +1,11 @@
 import moment from "moment";
 
-export default function addDateBasedAnnotations(annotations, report) {
+export default function dateBasedAnnotations(report) {
     function wentBankrupt() {
         return moment(report.bankruptDate).year() < 4000;
     }
 
-    let ageBased = 'true' //todo : extract as a user preference
+    let ageBased = 'true' //todo : extract as a user preference?
 
     function message(ageBased, age, date) {
         if(ageBased === 'true')
@@ -50,7 +50,5 @@ export default function addDateBasedAnnotations(annotations, report) {
         })
     }
     
-    if(annotations)
-        return newAnnotations.concat(annotations)
     return newAnnotations
 }

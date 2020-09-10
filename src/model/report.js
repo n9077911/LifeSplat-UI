@@ -9,6 +9,7 @@ export default function Report(report) {
     this.privatePensionAmountIndex = report.stepsHeaders.indexOf('PrivatePensionAmount')
     this.growthIndex = report.stepsHeaders.indexOf('Growth')
     this.dateIndex = report.stepsHeaders.indexOf('Date')
+    this.spendingIndex = report.stepsHeaders.indexOf('Spending')
     this.people = report.person;
 
     this.savings = (x) => sumForIndex(x)(this.savingsIndex)
@@ -18,7 +19,15 @@ export default function Report(report) {
     this.statePension = (x) => sumForIndex(x)(this.statePensionIndex)
 
     this.investmentGrowth = (x) => sumForIndex(x)(this.growthIndex)
-
+    
+    //the spending for a given month(step)
+    this.stepSpending = (x) => sumForIndex(x)(this.spendingIndex)
+    
+    //users spending steps e.g. £20k until age 30, then 40k 
+    this.spendingSteps = () => {
+        return this.rawReport.spendingSteps;
+    }
+    
     this.privatePensionGrowthToSpend = (x) => {
         let pension = this.people.map(p => {
             let stepDate = moment(p.steps[x][this.dateIndex]);
@@ -61,15 +70,17 @@ export default function Report(report) {
 
     this.spending = () => sum(this.people.map(p => p.spending))
 
-    this.savingsSpent = (x) => this.rawReport.monthlySpending - this.statePension(x) - this.privatePensionGrowthToSpend(x) - this.investmentGrowth(x) - this.salary(x);
+    this.savingsSpent = (x) => this.stepSpending(x) - this.statePension(x) - this.privatePensionGrowthToSpend(x) - this.investmentGrowth(x) - this.salary(x);
 
     this.stepDates = () => this.rawReport.person[0].steps.map(x => x[this.dateIndex])
     
     this.calcMinimumMode = () => this.rawReport.targetRetirementDate === null
 
     let sumForIndex = (x) => (index) => {
-        return sum(this.people.map(p => p.steps[x][index]))
+        let numbers = this.people.map(p => p.steps[x][index]);
+        return sum(numbers)
     }
+    
 
     function sum(numbers) {
         let result = 0;
