@@ -1,4 +1,3 @@
-//enter monthly
 //clarify that everything saved is assumed to be invested
 //add cash savings
 //review testing
@@ -18,6 +17,7 @@ export default function RetirementCalculator() {
     const [data, setData] = useState({})
     const [errors, setErrors] = useState({})
     const [personErrors, setPersonErrors] = useState([{}])
+    const [spendingStepErrors, setSpendingStepErrors] = useState([])
     const [targetRetirementAge, setTargetRetirementAge] = useState('')
 
     let spendingVar, salary, savings, pension = ""
@@ -34,11 +34,12 @@ export default function RetirementCalculator() {
     
     const [spending, setSpending] = useState(spendingVar)
     const [persons, setPersons] = useState([{salary: salary, savings: savings, pension: pension, employerContribution: "3", employeeContribution: "5", female: false, dob: new Date(1981, 4, 1)}])
+    const [spendingSteps, setSpendingSteps] = useState([])
 
     const submittedDob = useRef(persons[0].dob);
     const fullyCalcd = useRef(true);
 
-    function requestBody(persons, spending, targetRetirementAge) {
+    function requestBody(persons, spending, spendingSteps, targetRetirementAge) {
         persons = persons.map((p) => {
             let personDto = {
                 salary: parseInt(p.salary || 0),
@@ -54,15 +55,58 @@ export default function RetirementCalculator() {
             return personDto
         })
 
+        let steps = spendingSteps.map((x) => ({amount: parseInt(x.amount), age: parseInt(x.age)}));
+        steps.unshift({date: moment().toDate(), amount: parseInt(spending || 0)});
+        
         return {
             targetRetirementAge: targetRetirementAge === '' ? 0 : parseInt(targetRetirementAge),
             persons: persons,
-            spendingSteps: [{date: moment().toDate(), amount: parseInt(spending || 0)}, {date: moment().add(10, 'years').toDate(), amount: 15000}],
+            spendingSteps: steps,
         }
     }
 
+    function between18and100(age) {
+        age = parseInt(age)
+        return age >= 18 && age < 100;
+    }
+
+    function isAWholeNumber(numberString) {
+        return numberString.match(/^\d+$/);
+    }
+
+    function validateSpendingSteps(spendingSteps, spendingStepErrors) {
+        let errors = spendingSteps.map((s, i)=>{
+            let error = spendingStepErrors[i]
+            if(!between18and100(s.age)) {
+                error.age = true
+            }
+            if(!isAWholeNumber(s.amount)) {
+                error.amount = true
+            }
+            return error
+        });
+        return errors;
+    }
+
+    function hasSpendingStepErrors(spendingStepErrors) {
+        let hasError = false;
+        spendingStepErrors.forEach((x,i)=>{
+            if(x.age || x.amount) {
+                hasError = true;
+            }
+        })
+             
+        return hasError;
+    }
+
     const loadReportFromServer = useCallback(() => {
-        let body = JSON.stringify(requestBody(persons, parseInt(spending), targetRetirementAge));
+        let spendingStepsErrors = validateSpendingSteps(spendingSteps, spendingStepErrors);
+        if(hasSpendingStepErrors(spendingStepsErrors)) {
+            setSpendingStepErrors(spendingStepsErrors)
+            return;
+        }
+        
+        let body = JSON.stringify(requestBody(persons, parseInt(spending), spendingSteps, targetRetirementAge));
         fetch(url, {
             method: 'POST',
             accept: 'application/json',
@@ -85,7 +129,7 @@ export default function RetirementCalculator() {
                     setData({error: reason.toString()})
                 }
             )
-    }, [spending, targetRetirementAge, persons, url])
+    }, [spending, targetRetirementAge, persons, url, spendingSteps])
 
     function handleSubmit(event) {
         loadReportFromServer();
@@ -97,6 +141,24 @@ export default function RetirementCalculator() {
             fullyCalcd.current = false;
     }
 
+    function handleAddSpendingStep(event){
+        setStale()
+        spendingStepErrors.push({amount: '', age: ''})
+        spendingSteps.push({amount: '', age: ''})
+
+        setSpendingSteps(Array.from(spendingSteps))
+        
+        event.preventDefault();
+    }
+    
+    function handleRemoveSpendingStep(event){
+        setStale()
+        spendingSteps.pop()
+        spendingStepErrors.pop()
+        setSpendingSteps(Array.from(spendingSteps))
+        event.preventDefault();
+    }
+    
     function handleAddRemovePartner(event) {
         if (persons.length === 1) {
             persons.push({dob: persons[0].dob})
@@ -126,12 +188,14 @@ export default function RetirementCalculator() {
         setStale();
     }
 
-    let handleSalaryChange = (personIndex) => (event) => handleNumberChange(event, personIndex, 'salary')
-    let handleSavingsChange = (personIndex) => (event) => handleNumberChange(event, personIndex, 'savings')
-    let handlePensionChange = (personIndex) => (event) => handleNumberChange(event, personIndex, 'pension')
+    let handleSpendingStepAmountChange = (spendingStepIndex) => (event) => handleSpendingStepNumberChange(event, spendingStepIndex, 'amount')
+    let handleSpendingStepAgeChange = (spendingStepIndex) => (event) => handleSpendingStepNumberChange(event, spendingStepIndex, 'age')
+    let handleSalaryChange = (personIndex) => (event) => handlePersonNumberChange(event, personIndex, 'salary')
+    let handleSavingsChange = (personIndex) => (event) => handlePersonNumberChange(event, personIndex, 'savings')
+    let handlePensionChange = (personIndex) => (event) => handlePersonNumberChange(event, personIndex, 'pension')
     let handleEmployerContributionChange = (personIndex) => (event) => handleDecimalNumberChange(event, personIndex, 'employerContribution')
     let handleEmployeeContributionChange = (personIndex) => (event) => handleDecimalNumberChange(event, personIndex, 'employeeContribution')
-    let handleNiContributingYears = (personIndex) => (event) => handleNumberChange(event, personIndex, 'niContributingYears')
+    let handleNiContributingYears = (personIndex) => (event) => handlePersonNumberChange(event, personIndex, 'niContributingYears')
     
     let handleMaleFemale = (personIndex) => (event) => {
         setStale()
@@ -150,6 +214,13 @@ export default function RetirementCalculator() {
             setPersonErrors(update(personErrors, {[personIndex]: {[fieldName]: {$set: ""}}}))
     }
     
+    function setSpendingStepErrorForNumber(event, spendingStepIndex, fieldName) {
+        if (event.target.value && !event.target.value.match(/^\d+$/))
+            setSpendingStepErrors(update(spendingStepErrors, {[spendingStepIndex]: {[fieldName]: {$set: "Not a number"}}}))
+        else
+            setSpendingStepErrors(update(spendingStepErrors, {[spendingStepIndex]: {[fieldName]: {$set: ""}}}))
+    }
+    
     function setPersonErrorForDecimal(event, personIndex, fieldName) {
         if (event.target.value && !event.target.value.match(/^\d+(\.\d{0,2})?$/))
             setPersonErrors(update(personErrors, {[personIndex]: {[fieldName]: {$set: "Not a number"}}}))
@@ -164,11 +235,18 @@ export default function RetirementCalculator() {
             setErrors(update(errors, {[fieldName]: {$set: ""}}))
     }
 
-    function handleNumberChange(event, personIndex, fieldName) {
+    function handlePersonNumberChange(event, personIndex, fieldName) {
         setStale();
         setPersonErrorForNumber(event, personIndex, fieldName);
         let updatedPerson = update(persons, {[personIndex]: {[fieldName]: {$set: event.target.value}}});
         setPersons(updatedPerson);
+    }
+    
+    function handleSpendingStepNumberChange(event, spendingStepIndex, fieldName) {
+        setStale();
+        setSpendingStepErrorForNumber(event, spendingStepIndex, fieldName);
+        spendingSteps[spendingStepIndex][fieldName] = event.target.value
+        setSpendingSteps(Array.from(spendingSteps));
     }
     
     function handleDecimalNumberChange(event, personIndex, fieldName) {
@@ -190,6 +268,13 @@ export default function RetirementCalculator() {
             niContributingYears: handleNiContributingYears(index)
         }
     }
+    
+    function spendingStepChangeHandlers(index) {
+        return {
+            amount: handleSpendingStepAmountChange(index),
+            age: handleSpendingStepAgeChange(index),
+        }
+    }
 
     function reportHasRan() {
         return typeof data.person !== 'undefined'
@@ -202,10 +287,17 @@ export default function RetirementCalculator() {
                 <form className="salaryForm mx-1 mx-md-3">
                     <div className='' style={{width: '95vw'}}>
                         <div id="formComponents" className="d-flex-column flex-wrap">
-                            <div className="d-flex">
+                            <div className="centerFlex">
                                 <FormInputMoney error={errors.spending} handleChange={handleSpendingChange} value={spending} placeHolder={'spending'} popOver={spendingPopOver}>
                                     Annual Spending
                                 </FormInputMoney>
+                                <SpendingSteps spending={spendingSteps} errors={spendingStepErrors} changeHandlers={spendingStepChangeHandlers}>''</SpendingSteps>
+                                <button className="btn btn-primary mr-2 no-stretch" onClick={handleAddSpendingStep}>
+                                    {"Add Spending Step"}
+                                </button>
+                                {spendingSteps.length > 0 ?<button className="btn btn-primary mr-2 no-stretch" onClick={handleRemoveSpendingStep}>
+                                    {"Remove"}
+                                </button> : ''}
                                 <FormInput error={errors.targetRetirementAge} handleChange={handleTargetRetirementAgeChange} value={targetRetirementAge} placeHolder={'optional'}
                                            errorMessage={'Must be between 18 and 100'} inputClass="input-control-age" popOver={targetRetirementAgePopOver}>
                                     Target Retirement Age:
@@ -235,6 +327,21 @@ export default function RetirementCalculator() {
     );
 }
 
+function SpendingSteps(props){
+    let steps = props.spending.map((x, i)=>{
+        return (<div className={"d-flex"}>
+            <FormInput error={props.errors[i].age} handleChange={props.changeHandlers(i).age} value={x.age} 
+                       errorMessage={'Must be between 18 and 100'} inputClass="input-control-age" popOver={spendingStepAgePopOver}>
+                Age:
+            </FormInput><FormInputMoney error={props.errors[i].amount} handleChange={props.changeHandlers(i).amount} value={x.spending} placeHolder={'spending'} popOver={spendingStepAmountPopOver}>
+                Amount:
+            </FormInputMoney>
+        </div>)
+    })
+    
+    return (<div className={"d-flex"}>{steps}</div>)
+}
+
 function InitialExplainer(props){
     return <div className={"alert alert-primary"} style={{'max-width':'750px'}}>
         <h2>Welcome!</h2><h4>Enter your details to calculate your earliest feasible retirement date.</h4>
@@ -242,6 +349,8 @@ function InitialExplainer(props){
 }
 
 const spendingPopOver = <div><h5>The total amount you and your family spend per year. </h5></div>
+const spendingStepAmountPopOver = <div><h5>Annual amount you expect to spend. </h5></div>
+const spendingStepAgePopOver = <div><h5>The age you will start spending the new amount. </h5></div>
 
 const targetRetirementAgePopOver = <div><h5><strong>Optional:</strong> The date you want to retire.</h5>
     <h5>Leave blank to let LifeSplat calculate your earliest feasible retirement date.</h5></div>
@@ -311,7 +420,7 @@ function FormGroupLabel(props) {
 
 
 function FormInputPercent(props) {
-    let error = 'Must be a decimal.';
+    let error = 'Must be a number.';
     return <FormInput error={props.error} handleChange={props.handleChange} value={props.value} errorMessage={error} append={'%'}
                       inputClass="input-control-percent" popOver={props.popOver}>
         {props.children}
@@ -319,7 +428,7 @@ function FormInputPercent(props) {
 }
 
 function FormInputMoney(props) {
-    let error = 'Must be a positive number without punctuation.';
+    let error = 'Must be a whole number.';
     return <FormInput error={props.error} handleChange={props.handleChange} value={props.value} errorMessage={error} prepend={'£'}
                       inputClass="input-control-money" popOver={props.popOver}>
         {props.children}
