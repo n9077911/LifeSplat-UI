@@ -7,26 +7,37 @@ import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
 import moment from "moment";
 
+
+// Validators
+function getValidAgeError(value) {
+    if (value && !value.match(/^\d+$/) || (value.match(/^\d+$/) && parseInt(value) > 100)) {
+        return "Must be a number between 18 and 100";
+    } else {
+        return "";
+    }
+}
+
+function getErrorForNumber(value) {
+    return value && !value.match(/^\d+$/) ? "Not a number" : "";
+}
+
 export default function MainPage() {
-    let spendingVar, salary, savings, pension = ""
+    let spendingDefault, salary, savings, pension = ""
     let url = process.env.REACT_APP_SERVICE_URL;
 
     if(process.env.REACT_APP_ENV === 'dev')
     {
-        spendingVar = process.env.REACT_APP_SPENDING
+        spendingDefault = process.env.REACT_APP_SPENDING
         salary = process.env.REACT_APP_SALARY
         savings = process.env.REACT_APP_SAVINGS
         pension = process.env.REACT_APP_PENSION
     }
     
     const [result, setResult] = useState({})
-    const [errors, setErrors] = useState({})
-    const [targetRetirementAge, setTargetRetirementAge] = useState('')
-    const [spending, setSpending] = useState(spendingVar)
+    const [formState, setFormState] = useState({spending: spendingDefault, targetRetirementAge: '', spendingSteps: []})
+    const [errors, setErrors] = useState({spending: '', targetRetirementAge: '', spendingSteps: []})
     const [persons, setPersons] = useState([{salary: salary, savings: savings, pension: pension, employerContribution: "3", employeeContribution: "5", female: false, dob: new Date(1981, 4, 1)}])
     const [personErrors, setPersonErrors] = useState([{}])
-    const [spendingSteps, setSpendingSteps] = useState([])
-    const [spendingStepErrors, setSpendingStepErrors] = useState([])
 
     const submittedDob = useRef(persons[0].dob);
     const fullyCalcd = useRef(true);
@@ -34,11 +45,11 @@ export default function MainPage() {
     function requestBody(persons, spending, spendingSteps, targetRetirementAge) {
         persons = persons.map((p) => {
             let personDto = {
-                salary: parseInt(p.salary || 0),
-                savings: parseInt(p.savings || 0),
-                pension: parseInt(p.pension || 0),
-                employerContribution: parseFloat(p.employerContribution || 0),
-                employeeContribution: parseFloat(p.employeeContribution || 0),
+                salary: parseInt(p.salary || '0'),
+                savings: parseInt(p.savings || '0'),
+                pension: parseInt(p.pension || '0'),
+                employerContribution: parseFloat(p.employerContribution || '0'),
+                employeeContribution: parseFloat(p.employeeContribution || '0'),
                 female: p.female,
                 dob: p.dob
             };
@@ -92,13 +103,13 @@ export default function MainPage() {
     }
 
     const loadReportFromServer = useCallback(() => {
-        let spendingStepsErrors = validateSpendingSteps(spendingSteps, spendingStepErrors);
-        if(hasSpendingStepErrors(spendingStepsErrors)) {
-            setSpendingStepErrors(spendingStepsErrors)
+        let spendingStepsErrors = validateSpendingSteps(formState.spendingSteps, errors.spendingSteps);
+        if(hasSpendingStepErrors(errors.spendingSteps)) {
+            setErrors(update(errors, {spendingSteps: {$set: spendingStepsErrors}}))
             return;
         }
         
-        let body = JSON.stringify(requestBody(persons, parseInt(spending), spendingSteps, targetRetirementAge));
+        let body = JSON.stringify(requestBody(persons, parseInt(formState.spending), formState.spendingSteps, formState.targetRetirementAge));
         fetch(url, {
             method: 'POST',
             accept: 'application/json',
@@ -121,33 +132,32 @@ export default function MainPage() {
                     setResult({error: reason.toString()})
                 }
             )
-    }, [spending, targetRetirementAge, persons, url, spendingSteps])
+    }, [formState, persons, url, errors, validateSpendingSteps])
 
     function handleSubmit(event) {
         loadReportFromServer();
         event.preventDefault();
     }
 
-    function setStale() {
+    function setFormStale() {
         if (result.person)
             fullyCalcd.current = false;
     }
 
     function handleAddSpendingStep(event){
-        setStale()
-        spendingStepErrors.push({amount: '', age: ''})
-        spendingSteps.push({amount: '', age: ''})
-
-        setSpendingSteps(Array.from(spendingSteps))
+        setFormStale()
+        setErrors(update(errors, {spendingSteps: {$push: [{amount: '', age: ''}]}}))
+        setFormState(update(formState, {spendingSteps: {$push: [{amount: '', age: ''}]}}))
         
         event.preventDefault();
     }
     
     function handleRemoveSpendingStep(event){
-        setStale()
-        spendingSteps.pop()
-        spendingStepErrors.pop()
-        setSpendingSteps(Array.from(spendingSteps))
+        setFormStale()
+        errors.spendingSteps.pop()
+        formState.spendingSteps.pop()
+        setErrors(update(errors, {spendingSteps: {$set: Array.from(errors.spendingSteps)}}))
+        setFormState(update(formState, {spendingSteps: {$set: Array.from(formState.spendingSteps)}}))
         event.preventDefault();
     }
     
@@ -159,29 +169,13 @@ export default function MainPage() {
             persons.pop()
             personErrors.pop()
         }
-        setStale();
+        setFormStale();
         setPersons(Array.from(persons))
         setPersonErrors(Array.from(personErrors))
         event.preventDefault();
     }
 
-    function handleSpendingChange(event) {
-        setErrorForNumber(event, 'spending')
-        setSpending(event.target.value);
-        setStale();
-    }
 
-    function handleTargetRetirementAgeChange(event) {
-        if (event.target.value && (!event.target.value.match(/^\d+$/) || parseInt(event.target.value) > 100))
-            setErrors(update(errors, {targetRetirementAge: {$set: "Must be a number below 100"}}))
-        else
-            setErrors(update(errors, {targetRetirementAge: {$set: ""}}))
-        setTargetRetirementAge(event.target.value);
-        setStale();
-    }
-
-    let handleSpendingStepAmountChange = (spendingStepIndex) => (event) => handleSpendingStepNumberChange(event, spendingStepIndex, 'amount')
-    let handleSpendingStepAgeChange = (spendingStepIndex) => (event) => handleSpendingStepNumberChange(event, spendingStepIndex, 'age')
     let handleSalaryChange = (personIndex) => (event) => handlePersonNumberChange(event, personIndex, 'salary')
     let handleSavingsChange = (personIndex) => (event) => handlePersonNumberChange(event, personIndex, 'savings')
     let handlePensionChange = (personIndex) => (event) => handlePersonNumberChange(event, personIndex, 'pension')
@@ -190,12 +184,12 @@ export default function MainPage() {
     let handleNiContributingYears = (personIndex) => (event) => handlePersonNumberChange(event, personIndex, 'niContributingYears')
     
     let handleMaleFemale = (personIndex) => (event) => {
-        setStale()
+        setFormStale()
         return setPersons(update(persons, {[personIndex]: {female: {$set: event.target.value === "true"}}}))
     }
     
     let handleDob = (personIndex) => (dob) => {
-        setStale()
+        setFormStale()
         return setPersons(update(persons, {[personIndex]: {dob: {$set: dob}}}))
     }
     
@@ -206,13 +200,6 @@ export default function MainPage() {
             setPersonErrors(update(personErrors, {[personIndex]: {[fieldName]: {$set: ""}}}))
     }
     
-    function setSpendingStepErrorForNumber(event, spendingStepIndex, fieldName) {
-        if (event.target.value && !event.target.value.match(/^\d+$/))
-            setSpendingStepErrors(update(spendingStepErrors, {[spendingStepIndex]: {[fieldName]: {$set: "Not a number"}}}))
-        else
-            setSpendingStepErrors(update(spendingStepErrors, {[spendingStepIndex]: {[fieldName]: {$set: ""}}}))
-    }
-    
     function setPersonErrorForDecimal(event, personIndex, fieldName) {
         if (event.target.value && !event.target.value.match(/^\d+(\.\d{0,2})?$/))
             setPersonErrors(update(personErrors, {[personIndex]: {[fieldName]: {$set: "Not a number"}}}))
@@ -220,29 +207,17 @@ export default function MainPage() {
             setPersonErrors(update(personErrors, {[personIndex]: {[fieldName]: {$set: ""}}}))
     }
 
-    function setErrorForNumber(event, fieldName) {
-        if (event.target.value && !event.target.value.match(/^\d+$/))
-            setErrors(update(errors, {[fieldName]: {$set: "Not a number"}}))
-        else
-            setErrors(update(errors, {[fieldName]: {$set: ""}}))
-    }
-
     function handlePersonNumberChange(event, personIndex, fieldName) {
-        setStale();
+        setFormStale();
         setPersonErrorForNumber(event, personIndex, fieldName);
         let updatedPerson = update(persons, {[personIndex]: {[fieldName]: {$set: event.target.value}}});
         setPersons(updatedPerson);
     }
     
-    function handleSpendingStepNumberChange(event, spendingStepIndex, fieldName) {
-        setStale();
-        setSpendingStepErrorForNumber(event, spendingStepIndex, fieldName);
-        spendingSteps[spendingStepIndex][fieldName] = event.target.value
-        setSpendingSteps(Array.from(spendingSteps));
-    }
+
     
     function handleDecimalNumberChange(event, personIndex, fieldName) {
-        setStale();
+        setFormStale();
         setPersonErrorForDecimal(event, personIndex, fieldName);
         let updatedPerson = update(persons, {[personIndex]: {[fieldName]: {$set: event.target.value}}});
         setPersons(updatedPerson);
@@ -261,13 +236,6 @@ export default function MainPage() {
         }
     }
     
-    function spendingStepChangeHandlers(index) {
-        return {
-            amount: handleSpendingStepAmountChange(index),
-            age: handleSpendingStepAgeChange(index),
-        }
-    }
-
     function reportHasRan() {
         return typeof result.person !== 'undefined'
     }
@@ -280,20 +248,15 @@ export default function MainPage() {
                     <div className='' style={{width: '95vw'}}>
                         <div id="formComponents" className="d-flex-column flex-wrap">
                             <div className="centerFlex">
-                                <FormInputMoney error={errors.spending} handleChange={handleSpendingChange} value={spending} placeHolder={'spending'} popOver={spendingPopOver}>
-                                    Annual Spending
-                                </FormInputMoney>
-                                <SpendingSteps spending={spendingSteps} errors={spendingStepErrors} changeHandlers={spendingStepChangeHandlers}>''</SpendingSteps>
+                                <SpendingInput errors={errors} setErrors={setErrors} formState={formState} setFormState={setFormState} setStale={setFormStale}/>
+                                <SpendingSteps errors={errors} setErrors={setErrors} formState={formState} setFormState={setFormState} setStale={setFormStale}/>
                                 <button className="btn btn-primary mr-2 no-stretch" onClick={handleAddSpendingStep}>
                                     {"Add Spending Step"}
                                 </button>
-                                {spendingSteps.length > 0 ?<button className="btn btn-primary mr-2 no-stretch" onClick={handleRemoveSpendingStep}>
+                                {formState.spendingSteps.length > 0 ? <button className="btn btn-primary mr-2 no-stretch" onClick={handleRemoveSpendingStep}>
                                     {"Remove"}
                                 </button> : ''}
-                                <FormInput error={errors.targetRetirementAge} handleChange={handleTargetRetirementAgeChange} value={targetRetirementAge} placeHolder={'optional'}
-                                           errorMessage={'Must be between 18 and 100'} inputClass="input-control-age" popOver={targetRetirementAgePopOver}>
-                                    Target Retirement Age:
-                                </FormInput>
+                                <TargetRetirementAgeInput errors={errors} setErrors={setErrors} formState={formState} setFormState={setFormState} setStale={setFormStale}/>
                             </div>
                             <PersonFormSection changeHandlers={personChangeHandlers(0)} person={persons[0]} errors={personErrors} index={0}/>
                             {persons.length > 1 ?
@@ -318,14 +281,59 @@ export default function MainPage() {
         </div>
     );
 }
+function SpendingInput(props) {
+    const spendingPopOver = <div><h5>The total amount you and your family spend per year. </h5></div>
+
+    function handleSpendingChange(event) {
+        props.setErrors(update(props.errors, {['spending']: {$set: getErrorForNumber(event.target.value)}}))
+        props.setFormState(update(props.formState, {['spending']: {$set: event.target.value}}));
+        props.setStale();
+    }
+
+    return <FormInputMoney error={props.errors.spending} handleChange={handleSpendingChange} value={props.formState.spending} placeHolder={'spending'} popOver={spendingPopOver}>
+        Annual Spending
+    </FormInputMoney>;
+}
+
+function TargetRetirementAgeInput(props) {
+    const targetRetirementAgePopOver = <div><h5><strong>Optional:</strong> The date you want to retire.</h5>
+        <h5>Leave blank to let LifeSplat calculate your earliest feasible retirement date.</h5></div>
+
+    let targetRetirementAge = 'targetRetirementAge';
+
+    function handleChange(event) {
+        props.setErrors(update(props.errors, {[targetRetirementAge]: {$set: getValidAgeError(event.target.value)}}))
+        props.setFormState(update(props.formState, {[targetRetirementAge]: {$set: event.target.value}}));
+        props.setStale();
+    }
+
+    return <FormInput error={props.errors[targetRetirementAge]} handleChange={handleChange} value={props.formState.targetRetirementAge} placeHolder={'optional'}
+                      errorMessage={props.errors[targetRetirementAge]} inputClass="input-control-age" popOver={targetRetirementAgePopOver}>
+        Target Retirement Age:
+    </FormInput>;
+}
 
 function SpendingSteps(props){
-    let steps = props.spending.map((x, i)=>{
-        return (<div className={"d-flex"}>
-            <FormInput error={props.errors[i].age} handleChange={props.changeHandlers(i).age} value={x.age} 
+    const spendingStepAmountPopOver = <div><h5>Annual amount you expect to spend.</h5></div>
+    const spendingStepAgePopOver = <div><h5>The age you will start spending the new amount. </h5></div>
+    
+    function handleSpendingStepNumberChange(event, i, fieldName) {
+        props.setStale();
+        props.setErrors(update(props.errors, {['spendingSteps']:{[i]: {[fieldName]: {$set: getErrorForNumber(event.target.value)}}}}))
+        props.setFormState(update(props.formState, {['spendingSteps']:{[i]: {[fieldName]: {$set: event.target.value}}}}))
+    }
+    
+    let handleSpendingStepAgeChange = (spendingStepIndex) => (event) => handleSpendingStepNumberChange(event, spendingStepIndex, 'age')
+    let handleSpendingStepAmountChange = (spendingStepIndex) => (event) => handleSpendingStepNumberChange(event, spendingStepIndex, 'amount')
+    
+    let steps = props.formState.spendingSteps.map((x, i)=>{
+        return (<div className={"d-flex"} key={i}>
+            <FormInput error={props.errors.spendingSteps[i].age} handleChange={handleSpendingStepAgeChange(i)} value={x.age} 
                        errorMessage={'Must be between 18 and 100'} inputClass="input-control-age" popOver={spendingStepAgePopOver}>
                 Age:
-            </FormInput><FormInputMoney error={props.errors[i].amount} handleChange={props.changeHandlers(i).amount} value={x.spending} placeHolder={'spending'} popOver={spendingStepAmountPopOver}>
+            </FormInput>
+            <FormInputMoney error={props.errors.spendingSteps[i].amount} handleChange={handleSpendingStepAmountChange(i)} value={x.spending} 
+                            placeHolder={'spending'} popOver={spendingStepAmountPopOver}>
                 Amount:
             </FormInputMoney>
         </div>)
@@ -334,18 +342,13 @@ function SpendingSteps(props){
     return (<div className={"d-flex"}>{steps}</div>)
 }
 
+
+
 function InitialExplainer(){
     return <div className={"alert alert-primary"} style={{'max-width':'750px'}}>
         <h2>Welcome!</h2><h4>Enter your details to calculate your earliest feasible retirement date.</h4>
     </div>    
 }
-
-const spendingPopOver = <div><h5>The total amount you and your family spend per year. </h5></div>
-const spendingStepAmountPopOver = <div><h5>Annual amount you expect to spend. </h5></div>
-const spendingStepAgePopOver = <div><h5>The age you will start spending the new amount. </h5></div>
-
-const targetRetirementAgePopOver = <div><h5><strong>Optional:</strong> The date you want to retire.</h5>
-    <h5>Leave blank to let LifeSplat calculate your earliest feasible retirement date.</h5></div>
 
 const salaryPopOver = <div><h5>Your pre tax annual salary</h5></div>
 
@@ -444,7 +447,7 @@ function FormInput(props) {
                     <span className="input-group-prepend input-group-text">{props.prepend}</span>
                 </div>
                 : ''}
-            <OverlayTrigger trigger="focus" placement="top" popperConfig={{modifiers:[{name:'offset',options:{offset:[0,20]}}]}} overlay={Pop(props.popOver)}>
+            <OverlayTrigger trigger="focus" placement="top" popperConfig={{modifiers:[{name:'offset', options:{offset:[0,20]}}]}} overlay={Pop(props.popOver)}>
                 <input type="text" placeholder={props.placeHolder}
                    className={"form-control " + (props.error ? "is-invalid" : "")}
                    onChange={props.handleChange}
