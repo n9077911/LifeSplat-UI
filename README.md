@@ -8,6 +8,8 @@ The site is backed by [LifeSplat-Service](https://github.com/n9077911/LifeSplat-
 
 LifeSplat-UI's responsibilities are to accept inputs from the user and render a visualisation of the retirement report produced by LifeSplat-Service.
 
+![Example visualization](LifeSplat_chart.jpg)
+
 ## Tech Stack
 LifeSplat-UI is a Single Page App written javascript using [React](https://reactjs.org/). 
 
