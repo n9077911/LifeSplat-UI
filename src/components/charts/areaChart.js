@@ -1,6 +1,6 @@
 import React, {useEffect, useRef} from 'react';
 import Chart from 'chart.js';
-import {displayConstants, formatMoney} from '../../helpers';
+import {displayConstants} from '../../helpers';
 import 'chartjs-plugin-annotation';
 
 function AreaChart(props) {

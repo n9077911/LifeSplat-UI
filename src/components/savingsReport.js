@@ -1,6 +1,6 @@
 import AreaChart from "./charts/areaChart";
 import React from "react";
-import dateBasedAnnotations from "../dateBasedAnnotations";
+import dateBasedAnnotations from "../model/dateBasedAnnotations";
 import moment from "moment";
 import {formatMoney, positiveOrNull} from "../helpers";
 

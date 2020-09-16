@@ -5,7 +5,7 @@ import ReactDOM from "react-dom";
 import 'bootswatch/dist/darkly/bootstrap.min.css';
 import "./index.css";
 import {IntlProvider} from "react-intl";
-import RetirementCalculator from "./components/retirementCalculator";
+import MainPage from "./components/mainPage";
 
 class IncomeTax extends React.Component {
     render() {
@@ -16,8 +16,8 @@ class IncomeTax extends React.Component {
                         <h2>LifeSplat.com<small className="text-muted"> - v0.1-beta {process.env.REACT_APP_ENV === 'production' ? '' : process.env.REACT_APP_ENV}</small></h2>
                     </div>
                 </div>
-                <RetirementCalculator>
-                </RetirementCalculator>
+                <MainPage>
+                </MainPage>
             </div>
         );
     }

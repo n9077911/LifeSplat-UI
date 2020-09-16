@@ -1,9 +1,3 @@
-//clarify that everything saved is assumed to be invested
-//add cash savings
-//review testing
-//when bankrupt but no retirement date given it should say bankrupt.
-//when bankrupt it still displays a chart -- but its not that clear -perhaps just show red from then on
-
 import React, {useCallback, useRef, useState} from 'react';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -13,28 +7,26 @@ import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
 import moment from "moment";
 
-export default function RetirementCalculator() {
-    const [data, setData] = useState({})
-    const [errors, setErrors] = useState({})
-    const [personErrors, setPersonErrors] = useState([{}])
-    const [spendingStepErrors, setSpendingStepErrors] = useState([])
-    const [targetRetirementAge, setTargetRetirementAge] = useState('')
-
+export default function MainPage() {
     let spendingVar, salary, savings, pension = ""
     let url = process.env.REACT_APP_SERVICE_URL;
 
-    if(!process.env.REACT_APP_ENV) //dev
+    if(process.env.REACT_APP_ENV === 'dev')
     {
-        spendingVar = "20000"
-        salary = "50000"
-        savings = "50000"
-        pension = "50000"
-        url = "https://localhost:5001/api/Retirement/Report"
+        spendingVar = process.env.REACT_APP_SPENDING
+        salary = process.env.REACT_APP_SALARY
+        savings = process.env.REACT_APP_SAVINGS
+        pension = process.env.REACT_APP_PENSION
     }
     
+    const [result, setResult] = useState({})
+    const [errors, setErrors] = useState({})
+    const [targetRetirementAge, setTargetRetirementAge] = useState('')
     const [spending, setSpending] = useState(spendingVar)
     const [persons, setPersons] = useState([{salary: salary, savings: savings, pension: pension, employerContribution: "3", employeeContribution: "5", female: false, dob: new Date(1981, 4, 1)}])
+    const [personErrors, setPersonErrors] = useState([{}])
     const [spendingSteps, setSpendingSteps] = useState([])
+    const [spendingStepErrors, setSpendingStepErrors] = useState([])
 
     const submittedDob = useRef(persons[0].dob);
     const fullyCalcd = useRef(true);
@@ -90,7 +82,7 @@ export default function RetirementCalculator() {
 
     function hasSpendingStepErrors(spendingStepErrors) {
         let hasError = false;
-        spendingStepErrors.forEach((x,i)=>{
+        spendingStepErrors.forEach((x)=>{
             if(x.age || x.amount) {
                 hasError = true;
             }
@@ -123,10 +115,10 @@ export default function RetirementCalculator() {
             .then((data) => {
                 fullyCalcd.current = true;
                 submittedDob.current = persons[0].dob;
-                setData(data)
+                setResult(data)
             })
             .catch(reason => {
-                    setData({error: reason.toString()})
+                    setResult({error: reason.toString()})
                 }
             )
     }, [spending, targetRetirementAge, persons, url, spendingSteps])
@@ -137,7 +129,7 @@ export default function RetirementCalculator() {
     }
 
     function setStale() {
-        if (data.person)
+        if (result.person)
             fullyCalcd.current = false;
     }
 
@@ -277,7 +269,7 @@ export default function RetirementCalculator() {
     }
 
     function reportHasRan() {
-        return typeof data.person !== 'undefined'
+        return typeof result.person !== 'undefined'
     }
 
     return (
@@ -320,8 +312,8 @@ export default function RetirementCalculator() {
                 </form>
             </div>
             <div id="results" className="w-auto mt-3 ml-1 ml-md-3">
-                {reportHasRan() ? <TabbedRetirementReport report={data} dob={submittedDob.current}/> : ''}
-                {data.error ? data.error : ''}
+                {reportHasRan() ? <TabbedRetirementReport report={result} dob={submittedDob.current}/> : ''}
+                {result.error ? result.error : ''}
             </div>
         </div>
     );
@@ -342,7 +334,7 @@ function SpendingSteps(props){
     return (<div className={"d-flex"}>{steps}</div>)
 }
 
-function InitialExplainer(props){
+function InitialExplainer(){
     return <div className={"alert alert-primary"} style={{'max-width':'750px'}}>
         <h2>Welcome!</h2><h4>Enter your details to calculate your earliest feasible retirement date.</h4>
     </div>    

@@ -1,0 +1,8 @@
+#Feedback from Matt\Tom\Simon
+Clarify that everything saved is assumed to be invested
+Add cash savings\emergency fund
+When bankrupt but no retirement date given it should say bankrupt.
+When bankrupt it still displays a chart -- but its not that clear -perhaps just show red from then on.
+
+#Feedback from Reddit UKPersonalFinance
+...

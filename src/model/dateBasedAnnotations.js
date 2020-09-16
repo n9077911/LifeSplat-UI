@@ -5,7 +5,7 @@ export default function dateBasedAnnotations(report) {
         return moment(report.bankruptDate).year() < 4000;
     }
 
-    let ageBased = 'true' //todo : extract as a user preference?
+    let ageBased = 'true' 
 
     function message(ageBased, age, date) {
         if(ageBased === 'true')
