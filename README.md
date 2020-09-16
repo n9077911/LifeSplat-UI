@@ -51,8 +51,10 @@ Your app is ready to be deployed!
 
 
 ## Running in a local server
-Ensure http-server is installed 'npm install --global http-server'
+Ensure http-server is installed `npm install --global http-server`
+
 From the project directory run `http-server build` 
+
 This runs the build directory at localhost:8080
 
 
