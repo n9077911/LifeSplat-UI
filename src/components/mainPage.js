@@ -18,7 +18,11 @@ function getValidAgeError(value) {
 }
 
 function getErrorForNumber(value) {
-    return value && !value.match(/^\d+$/) ? "Not a number" : "";
+    return value && !value.match(/^\d+$/) ? "Must be a while number" : "";
+}
+
+function getErrorForPercent(value) {
+    return value && !value.match(/^\d+(\.\d{0,2})?$/) ? "Must be a number" : "";
 }
 
 export default function MainPage() {
@@ -34,12 +38,15 @@ export default function MainPage() {
     }
     
     const [result, setResult] = useState({})
-    const [formState, setFormState] = useState({spending: spendingDefault, targetRetirementAge: '', spendingSteps: []})
-    const [errors, setErrors] = useState({spending: '', targetRetirementAge: '', spendingSteps: []})
-    const [persons, setPersons] = useState([{salary: salary, savings: savings, pension: pension, employerContribution: "3", employeeContribution: "5", female: false, dob: new Date(1981, 4, 1)}])
-    const [personErrors, setPersonErrors] = useState([{}])
+    const [formState, setFormState] = useState({
+        spending: spendingDefault, 
+        targetRetirementAge: '', 
+        spendingSteps: [], 
+        persons: [{salary: salary, savings: savings, pension: pension, employerContribution: "3", employeeContribution: "5", female: false, dob: new Date(1981, 4, 1)}]
+    })
+    const [errors, setErrors] = useState({spending: '', targetRetirementAge: '', spendingSteps: [], persons: [{}]})
 
-    const submittedDob = useRef(persons[0].dob);
+    const submittedDob = useRef(formState.persons[0].dob);
     const fullyCalcd = useRef(true);
 
     function requestBody(persons, spending, spendingSteps, targetRetirementAge) {
@@ -109,7 +116,7 @@ export default function MainPage() {
             return;
         }
         
-        let body = JSON.stringify(requestBody(persons, parseInt(formState.spending), formState.spendingSteps, formState.targetRetirementAge));
+        let body = JSON.stringify(requestBody(formState.persons, parseInt(formState.spending), formState.spendingSteps, formState.targetRetirementAge));
         fetch(url, {
             method: 'POST',
             accept: 'application/json',
@@ -125,14 +132,14 @@ export default function MainPage() {
             })
             .then((data) => {
                 fullyCalcd.current = true;
-                submittedDob.current = persons[0].dob;
+                submittedDob.current = formState.persons[0].dob;
                 setResult(data)
             })
             .catch(reason => {
                     setResult({error: reason.toString()})
                 }
             )
-    }, [formState, persons, url, errors, validateSpendingSteps])
+    }, [formState, errors, url, validateSpendingSteps])
 
     function handleSubmit(event) {
         loadReportFromServer();
@@ -162,83 +169,25 @@ export default function MainPage() {
     }
     
     function handleAddRemovePartner(event) {
-        if (persons.length === 1) {
-            persons.push({dob: persons[0].dob})
-            personErrors.push({})
+        if (formState.persons.length === 1) {
+            formState.persons.push({dob: formState.persons[0].dob})
+            errors.persons.push({})
         } else {
-            persons.pop()
-            personErrors.pop()
+            formState.persons.pop()
+            formState.personErrors.pop()
         }
         setFormStale();
-        setPersons(Array.from(persons))
-        setPersonErrors(Array.from(personErrors))
+        setErrors(update(errors, {persons: {$set: Array.from(formState.persons)}}))
+        setFormState(update(formState, {persons: {$set: Array.from(formState.persons)}}))
+        
         event.preventDefault();
-    }
-
-
-    let handleSalaryChange = (personIndex) => (event) => handlePersonNumberChange(event, personIndex, 'salary')
-    let handleSavingsChange = (personIndex) => (event) => handlePersonNumberChange(event, personIndex, 'savings')
-    let handlePensionChange = (personIndex) => (event) => handlePersonNumberChange(event, personIndex, 'pension')
-    let handleEmployerContributionChange = (personIndex) => (event) => handleDecimalNumberChange(event, personIndex, 'employerContribution')
-    let handleEmployeeContributionChange = (personIndex) => (event) => handleDecimalNumberChange(event, personIndex, 'employeeContribution')
-    let handleNiContributingYears = (personIndex) => (event) => handlePersonNumberChange(event, personIndex, 'niContributingYears')
-    
-    let handleMaleFemale = (personIndex) => (event) => {
-        setFormStale()
-        return setPersons(update(persons, {[personIndex]: {female: {$set: event.target.value === "true"}}}))
-    }
-    
-    let handleDob = (personIndex) => (dob) => {
-        setFormStale()
-        return setPersons(update(persons, {[personIndex]: {dob: {$set: dob}}}))
-    }
-    
-    function setPersonErrorForNumber(event, personIndex, fieldName) {
-        if (event.target.value && !event.target.value.match(/^\d+$/))
-            setPersonErrors(update(personErrors, {[personIndex]: {[fieldName]: {$set: "Not a number"}}}))
-        else
-            setPersonErrors(update(personErrors, {[personIndex]: {[fieldName]: {$set: ""}}}))
-    }
-    
-    function setPersonErrorForDecimal(event, personIndex, fieldName) {
-        if (event.target.value && !event.target.value.match(/^\d+(\.\d{0,2})?$/))
-            setPersonErrors(update(personErrors, {[personIndex]: {[fieldName]: {$set: "Not a number"}}}))
-        else
-            setPersonErrors(update(personErrors, {[personIndex]: {[fieldName]: {$set: ""}}}))
-    }
-
-    function handlePersonNumberChange(event, personIndex, fieldName) {
-        setFormStale();
-        setPersonErrorForNumber(event, personIndex, fieldName);
-        let updatedPerson = update(persons, {[personIndex]: {[fieldName]: {$set: event.target.value}}});
-        setPersons(updatedPerson);
-    }
-    
-
-    
-    function handleDecimalNumberChange(event, personIndex, fieldName) {
-        setFormStale();
-        setPersonErrorForDecimal(event, personIndex, fieldName);
-        let updatedPerson = update(persons, {[personIndex]: {[fieldName]: {$set: event.target.value}}});
-        setPersons(updatedPerson);
-    }
-
-    function personChangeHandlers(index) {
-        return {
-            salary: handleSalaryChange(index),
-            savings: handleSavingsChange(index),
-            pension: handlePensionChange(index),
-            employerContribution: handleEmployerContributionChange(index),
-            employeeContribution: handleEmployeeContributionChange(index),
-            maleFemale: handleMaleFemale(index),
-            dob: handleDob(index),
-            niContributingYears: handleNiContributingYears(index)
-        }
     }
     
     function reportHasRan() {
         return typeof result.person !== 'undefined'
     }
+    
+    let formContext = {errors: errors, setErrors: setErrors, formState: formState, setFormState: setFormState, setFormStale: setFormStale}
 
     return (
         <div id="formAndResults" className="row d-flex flex-column">
@@ -248,24 +197,24 @@ export default function MainPage() {
                     <div className='' style={{width: '95vw'}}>
                         <div id="formComponents" className="d-flex-column flex-wrap">
                             <div className="centerFlex">
-                                <SpendingInput errors={errors} setErrors={setErrors} formState={formState} setFormState={setFormState} setStale={setFormStale}/>
-                                <SpendingSteps errors={errors} setErrors={setErrors} formState={formState} setFormState={setFormState} setStale={setFormStale}/>
+                                <SpendingInput errors={errors} setErrors={setErrors} formState={formState} setFormState={setFormState} setFormStale={setFormStale}/>
+                                <SpendingSteps errors={errors} setErrors={setErrors} formState={formState} setFormState={setFormState} setFormStale={setFormStale}/>
                                 <button className="btn btn-primary mr-2 no-stretch" onClick={handleAddSpendingStep}>
                                     {"Add Spending Step"}
                                 </button>
                                 {formState.spendingSteps.length > 0 ? <button className="btn btn-primary mr-2 no-stretch" onClick={handleRemoveSpendingStep}>
                                     {"Remove"}
                                 </button> : ''}
-                                <TargetRetirementAgeInput errors={errors} setErrors={setErrors} formState={formState} setFormState={setFormState} setStale={setFormStale}/>
+                                <TargetRetirementAgeInput errors={errors} setErrors={setErrors} formState={formState} setFormState={setFormState} setFormStale={setFormStale}/>
                             </div>
-                            <PersonFormSection changeHandlers={personChangeHandlers(0)} person={persons[0]} errors={personErrors} index={0}/>
-                            {persons.length > 1 ?
-                                <PersonFormSection changeHandlers={personChangeHandlers(1)} person={persons[1]} errors={personErrors} index={1}/>
+                            <PersonFormSection formContext={formContext} index={0}/>
+                            {formState.persons.length > 1 ?
+                                <PersonFormSection formContext={formContext} index={1}/>
                                 : ''}
                         </div>
                         <div>
                             <button className="btn btn-primary mr-2" onClick={handleAddRemovePartner}>
-                                {persons.length === 2 ? "Remove Partner" : "Add Partner"}
+                                {formState.persons.length === 2 ? "Remove Partner" : "Add Partner"}
                             </button>
                             <button className={"btn mr-2 " + (fullyCalcd.current ? "btn-success" : "btn-warning")} disabled={errors.salary} onClick={handleSubmit}>
                                 Calculate
@@ -281,18 +230,106 @@ export default function MainPage() {
         </div>
     );
 }
+
 function SpendingInput(props) {
     const spendingPopOver = <div><h5>The total amount you and your family spend per year. </h5></div>
 
-    function handleSpendingChange(event) {
+    function handleChange(event) {
         props.setErrors(update(props.errors, {['spending']: {$set: getErrorForNumber(event.target.value)}}))
         props.setFormState(update(props.formState, {['spending']: {$set: event.target.value}}));
-        props.setStale();
+        props.setFormStale();
     }
 
-    return <FormInputMoney error={props.errors.spending} handleChange={handleSpendingChange} value={props.formState.spending} placeHolder={'spending'} popOver={spendingPopOver}>
+    return <FormInputMoney error={props.errors.spending} handleChange={handleChange} value={props.formState.spending} placeHolder={'spending'} popOver={spendingPopOver}>
         Annual Spending
     </FormInputMoney>;
+}
+
+//gets the value based on the given path
+function navigate(object, path) {
+    let result = object
+    path.forEach((x) => result = result[x])
+    return result
+}
+
+//produces a change object as required by immutability-helper library
+function getSetObject(path, value) {
+    let reversePath = Array.from(path).reverse()
+
+    let object = {$set: value};
+
+    reversePath.forEach((x)=>
+    {
+        let newObject = {[x]: object}
+        object = newObject;
+    })
+    
+    return object;
+}
+
+function StatefulMoneyInput(props) {
+    
+    function handleChange(event) {
+        props.context.setErrors(update(props.context.errors, getSetObject(props.path, getErrorForNumber(event.target.value))))
+        props.context.setFormState(update(props.context.formState, getSetObject(props.path, event.target.value)))
+        props.context.setFormStale();
+    }
+
+    return <FormInputMoney error={navigate(props.context.errors, props.path)} handleChange={handleChange} value={navigate(props.context.formState, props.path)} 
+                           placeHolder={props.salary} popOver={props.popOver}>
+        {props.children}
+    </FormInputMoney>;
+}
+
+function StatefulPercentInput(props) {
+    
+    function handleChange(event) {
+        props.context.setErrors(update(props.context.errors, getSetObject(props.path, getErrorForPercent(event.target.value))))
+        props.context.setFormState(update(props.context.formState, getSetObject(props.path, event.target.value)))
+        props.context.setFormStale();
+    }
+
+    return <FormInputPercent error={navigate(props.context.errors, props.path)} handleChange={handleChange} value={navigate(props.context.formState, props.path)} 
+                           placeHolder={props.salary} popOver={props.popOver}>
+        {props.children}
+    </FormInputPercent>;
+}
+
+function NiContributingYearsInput(props) {
+        let path = ['persons', props.index, 'niContributingYears']
+    
+    function handleChange(event) {
+        props.context.setErrors(update(props.context.errors, getSetObject(path, getErrorForNumber(event.target.value))))
+        props.context.setFormState(update(props.context.formState, getSetObject(path, event.target.value)))
+        props.context.setFormStale();
+    }
+
+    return <div style={{'max-width':'115px'}}>
+            <FormInput error={props.context.errors.persons[props.index].niContributingYears} handleChange={handleChange} value={props.context.formState.persons[props.index].niContributingYears}
+                       errorMessage={"Must be a number"} append={'years'} style={{'max-width':'30px'}} popOver={contributingYearsPopOver}>
+                N.I. Contributions
+            </FormInput>
+    </div>
+}
+
+function DateOfBirthInput(props) {
+    let path = ['persons', props.index, 'dob']
+     
+    function handleChange(event) {
+        props.context.setFormState(update(props.context.formState, getSetObject(path, event)))
+        props.context.setFormStale();
+    }
+
+    return <div className="form-group">
+        <FormGroupLabel>DOB:</FormGroupLabel>
+        <div className="mr-1"><DatePicker
+            selected={props.context.formState.persons[props.index].dob}
+            onChange={handleChange}
+            showYearDropdown
+            showMonthDropdown
+            dateFormat="dd/MM/yyyy"/>
+        </div>
+    </div>
 }
 
 function TargetRetirementAgeInput(props) {
@@ -318,7 +355,7 @@ function SpendingSteps(props){
     const spendingStepAgePopOver = <div><h5>The age you will start spending the new amount. </h5></div>
     
     function handleSpendingStepNumberChange(event, i, fieldName) {
-        props.setStale();
+        props.setFormStale();
         props.setErrors(update(props.errors, {['spendingSteps']:{[i]: {[fieldName]: {$set: getErrorForNumber(event.target.value)}}}}))
         props.setFormState(update(props.formState, {['spendingSteps']:{[i]: {[fieldName]: {$set: event.target.value}}}}))
     }
@@ -341,8 +378,6 @@ function SpendingSteps(props){
     
     return (<div className={"d-flex"}>{steps}</div>)
 }
-
-
 
 function InitialExplainer(){
     return <div className={"alert alert-primary"} style={{'max-width':'750px'}}>
@@ -371,40 +406,24 @@ const contributingYearsPopOver = <div><h5><strong>Optional:</strong> The number 
 function PersonFormSection(props) {
     return <div id={"person" + props.index}>
         <div className="d-flex flex-wrap">
-            <FormInputMoney error={props.errors[props.index].salary} handleChange={props.changeHandlers.salary} value={props.person.salary} placeHolder={'salary'} popOver={salaryPopOver}>
+            <StatefulMoneyInput context={props.formContext} path={['persons', props.index, 'salary']} placeholder={'salary'} popOver={salaryPopOver}>
                 Annual Salary
-            </FormInputMoney>
-            <FormInputMoney error={props.errors[props.index].savings} handleChange={props.changeHandlers.savings} value={props.person.savings} placeHolder={'savings'} popOver={savingsPopOver}>
+            </StatefulMoneyInput>
+            <StatefulMoneyInput context={props.formContext} path={['persons', props.index, 'savings']} placeholder={'savings'} popOver={savingsPopOver}>
                 Savings
-            </FormInputMoney>
-            <FormInputMoney error={props.errors[props.index].pension} handleChange={props.changeHandlers.pension} value={props.person.pension} placeHolder={'pension'} popOver={pensionPopOver}>
+            </StatefulMoneyInput>
+            <StatefulMoneyInput context={props.formContext} path={['persons', props.index, 'pension']} placeholder={'pension'} popOver={pensionPopOver}>
                 Existing Pension
-            </FormInputMoney>
-            <FormInputPercent error={props.errors[props.index].employerContribution} handleChange={props.changeHandlers.employerContribution} value={props.person.employerContribution}
-                              popOver={employerContributionPopOver}>
+            </StatefulMoneyInput>
+            <StatefulPercentInput context={props.formContext} path={['persons', props.index, 'employerContribution']} popOver={employerContributionPopOver}>
                 Employer Contribution
-            </FormInputPercent>
-            <FormInputPercent error={props.errors[props.index].employeeContribution} handleChange={props.changeHandlers.employeeContribution} value={props.person.employeeContribution} 
-                              popOver={employeeContributionPopOver}>
+            </StatefulPercentInput>
+            <StatefulPercentInput context={props.formContext} path={['persons', props.index, 'employeeContribution']} popOver={employeeContributionPopOver}>
                 Employee Contribution
-            </FormInputPercent>
-            <div style={{'max-width':'115px'}}>
-                    <FormInput error={props.errors[props.index].niContributingYears} handleChange={props.changeHandlers.niContributingYears} value={props.person.niContributingYears}
-                               errorMessage={"Must be a number"} append={'years'} style={{'max-width':'30px'}} popOver={contributingYearsPopOver}>
-                        N.I. Contributions
-                    </FormInput>
-            </div>
-            <div className="form-group">
-                <FormGroupLabel>DOB:</FormGroupLabel>
-                <div className="mr-1"><DatePicker
-                    selected={props.person.dob}
-                    onChange={props.changeHandlers.dob}
-                    showYearDropdown
-                    showMonthDropdown
-                    dateFormat="dd/MM/yyyy"/>
-                </div>
-            </div>
-            <FormGenderRadio onChange={props.changeHandlers.maleFemale} index={props.index}/>
+            </StatefulPercentInput>
+            <NiContributingYearsInput context={props.formContext} index={props.index}/>
+            <DateOfBirthInput context={props.formContext} index={props.index}/>
+            <FormGenderRadio context={props.formContext} index={props.index}/>
         </div>
     </div>
 }
@@ -466,8 +485,13 @@ function FormInput(props) {
 }
 
 function FormGenderRadio(props) {
+    function handleMaleFemale(event) {
+        props.context.setFormStale()
+        props.context.setFormState(update(props.context.formState, {persons: {[props.index]: {female: {$set: event.target.value === "true"}}}}))
+    }
+    
     return <div className="mr-1 mt-3">
-        <fieldset className="form-group" onChange={props.onChange}>
+        <fieldset className="form-group" onChange={handleMaleFemale}>
             <div>
                 <div className="form-check">
                     <label className="form-check-label">
