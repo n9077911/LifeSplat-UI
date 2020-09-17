@@ -9,16 +9,21 @@ import Assumptions from "./assumptions";
 
 function TabbedRetirementReport(props) {
 
-    let report = new Report(props.report);
+    function reportHasRan() {
+        return typeof props.rawReport.person !== 'undefined'
+    }        
+
+    let report = reportHasRan() ? new Report(props.rawReport) : null;
     
     return (
-        <div>
+        <div id="results" className="w-auto mt-3 ml-1 ml-md-3">
+            {reportHasRan() ? 
             <Tabs defaultActiveKey="highLevel" className="mx-0">
                 <Tab eventKey="highLevel" title="Summary">
-                    <SummaryReportForCouple report={props.report}/>
+                    <SummaryReportForCouple report={props.rawReport}/>
                 </Tab>
                 <Tab eventKey="incomeVsSpendingReport" title="Income vs Spending">
-                    <IncomeVsSpendingReport report={props.report} dob={props.dob}/>
+                    <IncomeVsSpendingReport report={props.rawReport} dob={props.dob}/>
                 </Tab>
                 <Tab eventKey="savingsReport" title="Investments">
                     <SavingsReport report={report} dob={props.dob}/>
@@ -30,6 +35,8 @@ function TabbedRetirementReport(props) {
                 {/*    <BreakdownReport report={props.report}/>*/}
                 {/*</Tab>*/}
             </Tabs>
+                : ''}
+            {props.rawReport.error ? props.rawReport.error : ''}
         </div>
     );
 }
