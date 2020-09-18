@@ -2,7 +2,7 @@ import moment from "moment";
 import {formatMoney, positiveOrNull} from "../helpers";
 import AreaChart from "./charts/areaChart";
 import React from "react";
-import dateBasedAnnotations from "../dateBasedAnnotations";
+import dateBasedAnnotations from "../model/dateBasedAnnotations";
 import Report from "../model/report";
 
 function IncomeVsSpendingReport(props) {

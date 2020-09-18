@@ -34,4 +34,16 @@
   min-width: 1000px;
 }
 
+.initial-explainer {
+  max-width: 750px;
+}
+
+.max-width-115 {
+  max-width: 115px;
+}
+
+.max-width-30 {
+  max-width: 30px;
+}
+
 

@@ -39,7 +39,7 @@ export default function SummaryReportForCouple(props) {
     }
 
     function getPersonReport(report, person, partner) {
-        return <ul style={{"min-width": "400px"}}>
+        return <ul style={{"minWidth": "400px"}}>
             <li className="mt-2">{getRetirementAgeSummary(report, person, partner)}</li>
             <li className="mt-2">{Your(partner)} state pension starts {moment(person.stateRetirementDate).format("MMM YYYY")} at age &nbsp;<span
                 className="text-big text-success">{person.stateRetirementAge}</span></li>
