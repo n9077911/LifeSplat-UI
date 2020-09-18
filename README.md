@@ -6,12 +6,12 @@ Projections are based on the users key financial details and assumptions.
 The site is backed by [LifeSplat-Service](https://github.com/n9077911/LifeSplat-Service)
  for more details see the [README.md](https://github.com/n9077911/LifeSplat-Service/blob/master/README.md)
 
-LifeSplat-UI's responsibilities are to accept inputs from the user and render a visualisation of the retirement report produced by LifeSplat-Service.
+LifeSplat-UI's responsibilities are to accept inputs from the user and render a visualisation of the retirement report produced by [LifeSplat-Service](https://github.com/n9077911/LifeSplat-Service).
 
 ![Example visualization](LifeSplat_chart.jpg)
 
 ## Tech Stack
-LifeSplat-UI is a Single Page App written javascript using [React](https://reactjs.org/). 
+LifeSplat-UI is a Single Page App written in javascript using [React](https://reactjs.org/). 
 
 Charts are produced using [ChartJS](https://www.chartjs.org/) and [chartjs-annotation-plugin](https://github.com/chartjs/chartjs-plugin-annotation)
 
