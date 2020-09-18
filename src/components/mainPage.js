@@ -78,7 +78,7 @@ export default function MainPage() {
                     setResult({error: reason.toString()})
                 }
             )
-    }, [formState, errors, url])
+    }, [formState, url])
 
     function handleSubmit() {
         loadReportFromServer();
@@ -107,7 +107,7 @@ export default function MainPage() {
 }
 
 function InitialExplainer(){
-    return <div className={"alert alert-primary"} style={{'max-width':'750px'}}>
+    return <div className={"alert alert-primary initial-explainer"}>
         <h2>Welcome!</h2><h4>Enter your details to calculate your earliest feasible retirement date.</h4>
     </div>
 }

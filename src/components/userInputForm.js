@@ -150,9 +150,9 @@ function NiContributingYearsInput(props) {
         props.context.setFormStale();
     }
 
-    return <div style={{'max-width':'115px'}}>
-        <FormInput error={props.context.errors.persons[props.index].niContributingYears} handleChange={handleChange} value={props.context.formState.persons[props.index].niContributingYears}
-                   errorMessage={"Must be a number"} append={'years'} style={{'max-width':'30px'}} popOver={contributingYearsPopOver}>
+    return <div className={'max-width-115'}>
+        <FormInput className={'max-width-30'} error={props.context.errors.persons[props.index].niContributingYears} handleChange={handleChange} 
+                   value={props.context.formState.persons[props.index].niContributingYears} errorMessage={"Must be a number"} append={'years'} popOver={contributingYearsPopOver}>
             N.I. Contributions
         </FormInput>
     </div>
@@ -202,8 +202,8 @@ function SpendingSteps(props){
 
     function handleSpendingStepNumberChange(event, i, fieldName) {
         props.formContext.setFormStale();
-        props.formContext.setErrors(update(props.formContext.errors, {['spendingSteps']:{[i]: {[fieldName]: {$set: getErrorForNumber(event.target.value)}}}}))
-        props.formContext.setFormState(update(props.formContext.formState, {['spendingSteps']:{[i]: {[fieldName]: {$set: event.target.value}}}}))
+        props.formContext.setErrors(update(props.formContext.errors, {spendingSteps: {[i]: {[fieldName]: {$set: getErrorForNumber(event.target.value)}}}}))
+        props.formContext.setFormState(update(props.formContext.formState, {spendingSteps :{[i]: {[fieldName]: {$set: event.target.value}}}}))
     }
 
     let handleSpendingStepAgeChange = (spendingStepIndex) => (event) => handleSpendingStepNumberChange(event, spendingStepIndex, 'age')
@@ -357,7 +357,7 @@ const contributingYearsPopOver = <div><h5><strong>Optional:</strong> The number 
 
 //***Validators
 function getValidAgeError(value) {
-    if (value && !value.match(/^\d+$/) || (value.match(/^\d+$/) && parseInt(value) > 100)) {
+    if (value && (!value.match(/^\d+$/) || (value.match(/^\d+$/) && parseInt(value) > 100))) {
         return "Must be a number between 18 and 100";
     } else {
         return "";
