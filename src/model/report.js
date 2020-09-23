@@ -10,9 +10,12 @@ export default function Report(report) {
     this.growthIndex = report.stepsHeaders.indexOf('Growth')
     this.dateIndex = report.stepsHeaders.indexOf('Date')
     this.spendingIndex = report.stepsHeaders.indexOf('Spending')
+    this.cashSavingsIndex = report.stepsHeaders.indexOf('CashSavings')
     this.people = report.person;
 
     this.savings = (x) => sumForIndex(x)(this.savingsIndex)
+
+    this.cashSavings = (x) => sumForIndex(x)(this.cashSavingsIndex)
 
     this.salary = (x) => sumForIndex(x)(this.salaryIndex)
 

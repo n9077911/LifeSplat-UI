@@ -5,7 +5,7 @@ import moment from "moment";
 import UserInputForm from "./userInputForm";
 
 export default function MainPage() {
-    let spendingDefault, salary, savings, pension = ""
+    let spendingDefault, salary, savings, pension, targetCashSavings = ''
     let url = process.env.REACT_APP_SERVICE_URL;
 
     if(process.env.REACT_APP_ENV === 'dev')
@@ -14,26 +14,28 @@ export default function MainPage() {
         salary = process.env.REACT_APP_SALARY
         savings = process.env.REACT_APP_SAVINGS
         pension = process.env.REACT_APP_PENSION
+        targetCashSavings = process.env.REACT_APP_PENSION
     }
     
     const [result, setResult] = useState({})
     const [formState, setFormState] = useState({
         spending: spendingDefault, 
-        targetRetirementAge: '', 
+        targetRetirementAge: targetCashSavings, 
+        targetCashSavings: '', 
         spendingSteps: [], 
         persons: [{salary: salary, savings: savings, pension: pension, employerContribution: "3", employeeContribution: "5", female: false, dob: new Date(1981, 4, 1)}]
     })
-    const [errors, setErrors] = useState({spending: '', targetRetirementAge: '', spendingSteps: [], persons: [{}]})
+    const [errors, setErrors] = useState({spending: '', targetRetirementAge: '', targetCashSavings: '', spendingSteps: [], persons: [{}]})
 
     const submittedDob = useRef(formState.persons[0].dob);
     const fullyCalcd = useRef(true);
 
-    function requestBody(persons, spending, spendingSteps, targetRetirementAge) {
+    function requestBody(persons, spending, spendingSteps, targetRetirementAge, targetCashSavings) {
         persons = persons.map((p) => {
             let personDto = {
-                salary: parseInt(p.salary || '0'),
-                savings: parseInt(p.savings || '0'),
-                pension: parseInt(p.pension || '0'),
+                salary: convertMoneyStringToInt(p.salary),
+                savings: convertMoneyStringToInt(p.savings),
+                pension: convertMoneyStringToInt(p.pension),
                 employerContribution: parseFloat(p.employerContribution || '0'),
                 employeeContribution: parseFloat(p.employeeContribution || '0'),
                 female: p.female,
@@ -44,18 +46,19 @@ export default function MainPage() {
             return personDto
         })
 
-        let steps = spendingSteps.map((x) => ({amount: parseInt(x.amount), age: parseInt(x.age)}));
-        steps.unshift({date: moment().toDate(), amount: parseInt(spending || 0)});
+        let steps = spendingSteps.map((x) => ({amount: convertMoneyStringToInt(x.amount), age: parseInt(x.age)}));
+        steps.unshift({date: moment().toDate(), amount: convertMoneyStringToInt(spending)});
         
         return {
             targetRetirementAge: targetRetirementAge === '' ? 0 : parseInt(targetRetirementAge),
+            targetCashSavings: targetCashSavings,
             persons: persons,
             spendingSteps: steps,
         }
     }
 
     const loadReportFromServer = useCallback(() => {
-        let body = JSON.stringify(requestBody(formState.persons, parseInt(formState.spending), formState.spendingSteps, formState.targetRetirementAge));
+        let body = JSON.stringify(requestBody(formState.persons, formState.spending, formState.spendingSteps, formState.targetRetirementAge, formState.targetCashSavings));
         fetch(url, {
             method: 'POST',
             accept: 'application/json',
@@ -110,4 +113,10 @@ function InitialExplainer(){
     return <div className={"alert alert-primary initial-explainer"}>
         <h2>Welcome!</h2><h4>Enter your details to calculate your earliest feasible retirement date.</h4>
     </div>
+}
+
+function convertMoneyStringToInt(s) {
+    if(s.match(/^\d+[kK]$/))
+        return parseInt(s.slice(0, -1)) * 1000
+    return parseInt(s || '0');
 }
