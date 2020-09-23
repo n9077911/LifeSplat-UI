@@ -99,8 +99,6 @@ export default function UserInputForm(props) {
                             {"Remove"}
                         </button> : ''}
                         <TargetRetirementAgeInput formContext={props.formContext}/>
-                        
-                        
                         <StatefulMoneyInput context={props.formContext} path={['targetCashSavings']} placeholder={'optional'} popOver={targetCashSavingsPopOver}
                             validator={getMoneyOrMonthError}>
                             Target Cash Savings
