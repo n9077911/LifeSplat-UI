@@ -99,6 +99,10 @@ export default function UserInputForm(props) {
                             {"Remove"}
                         </button> : ''}
                         <TargetRetirementAgeInput formContext={props.formContext}/>
+                        <StatefulMoneyInput context={props.formContext} path={['targetCashSavings']} placeholder={'optional'} popOver={targetCashSavingsPopOver}
+                            validator={getMoneyOrMonthError}>
+                            Target Cash Savings
+                        </StatefulMoneyInput>
                     </div>
                     <PersonFormSection formContext={props.formContext} index={0}/>
                     {props.formContext.formState.persons.length > 1 ? <PersonFormSection formContext={props.formContext} index={1}/>  : ''}
@@ -167,7 +171,7 @@ function DateOfBirthInput(props) {
     }
 
     return <div className="form-group">
-        <FormGroupLabel>DOB:</FormGroupLabel>
+        <FormGroupLabel>DOB</FormGroupLabel>
         <div className="mr-1"><DatePicker
             selected={props.context.formState.persons[props.index].dob}
             onChange={handleChange}
@@ -192,7 +196,7 @@ function TargetRetirementAgeInput(props) {
 
     return <FormInput error={props.formContext.errors[targetRetirementAge]} handleChange={handleChange} value={props.formContext.formState.targetRetirementAge} placeHolder={'optional'}
                       errorMessage={props.formContext.errors[targetRetirementAge]} inputClass="input-control-age" popOver={targetRetirementAgePopOver}>
-        Target Retirement Age:
+        Target Retirement Age
     </FormInput>;
 }
 
@@ -254,9 +258,9 @@ function FormGenderRadio(props) {
 }
 
 function StatefulMoneyInput(props) {
-
+    let validator = props.validator ?? getErrorForNumber
     function handleChange(event) {
-        props.context.setErrors(update(props.context.errors, getSetObject(props.path, getErrorForNumber(event.target.value))))
+        props.context.setErrors(update(props.context.errors, getSetObject(props.path, validator(event.target.value))))
         props.context.setFormState(update(props.context.formState, getSetObject(props.path, event.target.value)))
         props.context.setFormStale();
     }
@@ -293,8 +297,7 @@ function FormInputPercent(props) {
 }
 
 function FormInputMoney(props) {
-    let error = 'Must be a whole number.';
-    return <FormInput error={props.error} handleChange={props.handleChange} value={props.value} errorMessage={error} prepend={'£'}
+    return <FormInput error={props.error} handleChange={props.handleChange} value={props.value} errorMessage={props.error} prepend={'£'}
                       inputClass="input-control-money" popOver={props.popOver}>
         {props.children}
     </FormInput>
@@ -336,11 +339,15 @@ function Pop(message) {
 }
 
 //***Popovers
-const spendingPopOver = <div><h5>The total amount you and your family spend per year. </h5></div>
+const spendingPopOver = <div><h5>The total amount you and your family spend per year. e.g. 20000 or 20k</h5></div>
 
-const salaryPopOver = <div><h5>Your pre tax annual salary</h5></div>
+const targetCashSavingsPopOver = <div><h5>The amount of cash savings you expect to keep.</h5>
+    <hr/><h5>Specified as an amount e.g. 2000, 2k</h5>
+    <hr/><h5>Or specify a number of months expenditure you will keep as cash e.g. 3m</h5></div>
 
-const savingsPopOver = <div><h5>Your total savings including investments e.g. cash, shares, bonds, funds, bitcoin, gold, rental property</h5><hr/>
+const salaryPopOver = <div><h5>Your pre tax annual salary e.g. 20000 or 20k</h5></div>
+
+const savingsPopOver = <div><h5>Your current TOTAL savings including cash and investments e.g. shares, bonds, funds, bitcoin, gold, rental property</h5><hr/>
     <h5>Include anything that is easily convertible into money and that you own specifically as a store of wealth or to earn a profit.</h5><hr/>
     <h5>For rental property include the cash value you would receive should you sell it i.e. minus mortgage repayment and other expenses</h5></div>
 
@@ -365,7 +372,19 @@ function getValidAgeError(value) {
 }
 
 function getErrorForNumber(value) {
-    return value && !value.match(/^\d+$/) ? "Must be a while number" : "";
+    if(!value)
+        return
+    if(value.match(/^\d+$/) ||value.match(/^\d+[kK]$/))
+        return
+    return "Must be a whole number e.g. 2000, 2k" ;
+}
+
+function getMoneyOrMonthError(value) {
+    if(!value)
+        return
+    if(value.match(/^\d+$/) ||value.match(/^\d+[kK]$/) || value.match(/^\d+[mM]$/))
+        return
+    return "Must be a whole number or a number of months e.g. 2000, 2k or 3m" ;
 }
 
 function getErrorForPercent(value) {
