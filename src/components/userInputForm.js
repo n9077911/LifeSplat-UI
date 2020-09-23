@@ -99,9 +99,9 @@ export default function UserInputForm(props) {
                             {"Remove"}
                         </button> : ''}
                         <TargetRetirementAgeInput formContext={props.formContext}/>
-                        <StatefulMoneyInput context={props.formContext} path={['targetCashSavings']} placeholder={'optional'} popOver={targetCashSavingsPopOver}
+                        <StatefulMoneyInput context={props.formContext} path={['emergencyFund']} placeholder={'optional'} popOver={emergencyFundPopOver}
                             validator={getMoneyOrMonthError}>
-                            Target Cash Savings
+                            Emergency Fund
                         </StatefulMoneyInput>
                     </div>
                     <PersonFormSection formContext={props.formContext} index={0}/>
@@ -341,7 +341,7 @@ function Pop(message) {
 //***Popovers
 const spendingPopOver = <div><h5>The total amount you and your family spend per year. e.g. 20000 or 20k</h5></div>
 
-const targetCashSavingsPopOver = <div><h5>The amount of cash savings you expect to keep.</h5>
+const emergencyFundPopOver = <div><h5>The amount of cash savings you expect to keep.</h5>
     <hr/><h5>Specified as an amount e.g. 2000, 2k</h5>
     <hr/><h5>Or specify a number of months expenditure you will keep as cash e.g. 3m</h5></div>
 

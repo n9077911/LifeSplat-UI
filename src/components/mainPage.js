@@ -5,7 +5,7 @@ import moment from "moment";
 import UserInputForm from "./userInputForm";
 
 export default function MainPage() {
-    let spendingDefault, salary, savings, pension, targetCashSavings = ''
+    let spendingDefault, salary, savings, pension, emergencyFund = ''
     let url = process.env.REACT_APP_SERVICE_URL;
 
     if(process.env.REACT_APP_ENV === 'dev')
@@ -14,14 +14,14 @@ export default function MainPage() {
         salary = process.env.REACT_APP_SALARY
         savings = process.env.REACT_APP_SAVINGS
         pension = process.env.REACT_APP_PENSION
-        targetCashSavings = process.env.REACT_APP_PENSION
+        emergencyFund = process.env.REACT_APP_EMERGENCY_FUND
     }
     
     const [result, setResult] = useState({})
     const [formState, setFormState] = useState({
         spending: spendingDefault, 
-        targetRetirementAge: targetCashSavings, 
-        targetCashSavings: '', 
+        targetRetirementAge: '',
+        emergencyFund: emergencyFund, 
         spendingSteps: [], 
         persons: [{salary: salary, savings: savings, pension: pension, employerContribution: "3", employeeContribution: "5", female: false, dob: new Date(1981, 4, 1)}]
     })
@@ -30,7 +30,7 @@ export default function MainPage() {
     const submittedDob = useRef(formState.persons[0].dob);
     const fullyCalcd = useRef(true);
 
-    function requestBody(persons, spending, spendingSteps, targetRetirementAge, targetCashSavings) {
+    function requestBody(persons, spending, spendingSteps, targetRetirementAge, emergencyFund) {
         persons = persons.map((p) => {
             let personDto = {
                 salary: convertMoneyStringToInt(p.salary),
@@ -51,14 +51,14 @@ export default function MainPage() {
         
         return {
             targetRetirementAge: targetRetirementAge === '' ? 0 : parseInt(targetRetirementAge),
-            targetCashSavings: targetCashSavings,
+            emergencyFund: emergencyFund,
             persons: persons,
             spendingSteps: steps,
         }
     }
 
     const loadReportFromServer = useCallback(() => {
-        let body = JSON.stringify(requestBody(formState.persons, formState.spending, formState.spendingSteps, formState.targetRetirementAge, formState.targetCashSavings));
+        let body = JSON.stringify(requestBody(formState.persons, formState.spending, formState.spendingSteps, formState.targetRetirementAge, formState.emergencyFund));
         fetch(url, {
             method: 'POST',
             accept: 'application/json',
@@ -116,6 +116,8 @@ function InitialExplainer(){
 }
 
 function convertMoneyStringToInt(s) {
+    if(s === undefined)
+        return 0
     if(s.match(/^\d+[kK]$/))
         return parseInt(s.slice(0, -1)) * 1000
     return parseInt(s || '0');
