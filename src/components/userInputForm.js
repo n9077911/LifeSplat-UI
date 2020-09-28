@@ -8,15 +8,6 @@ import Popover from "react-bootstrap/Popover";
 export default function UserInputForm(props) {
     let context = props.formContext;
 
-    function between18and100(age) {
-        age = parseInt(age)
-        return age >= 18 && age < 100;
-    }
-
-    function isAWholeNumber(numberString) {
-        return numberString.match(/^\d+$/);
-    }
-
     function validateSpendingSteps(spendingSteps, spendingStepErrors) {
         let errors = spendingSteps.map((s, i)=>{
             let error = spendingStepErrors[i]
@@ -91,6 +82,10 @@ export default function UserInputForm(props) {
                         <StatefulMoneyInput context={props.formContext} path={['spending']} placeholder={'spending'} popOver={spendingPopOver}>
                             Annual Spending
                         </StatefulMoneyInput>
+                        <StatefulMoneyInput context={props.formContext} path={['emergencyFund']} placeholder={'optional'} popOver={emergencyFundPopOver}
+                                            validator={getMoneyOrMonthError}>
+                            Emergency Fund
+                        </StatefulMoneyInput>
                         <SpendingSteps formContext={props.formContext}/>
                         <button className="btn btn-primary mr-2 no-stretch" onClick={handleAddSpendingStep}>
                             {"Add Spending Step"}
@@ -99,10 +94,6 @@ export default function UserInputForm(props) {
                             {"Remove"}
                         </button> : ''}
                         <TargetRetirementAgeInput formContext={props.formContext}/>
-                        <StatefulMoneyInput context={props.formContext} path={['emergencyFund']} placeholder={'optional'} popOver={emergencyFundPopOver}
-                            validator={getMoneyOrMonthError}>
-                            Emergency Fund
-                        </StatefulMoneyInput>
                     </div>
                     <PersonFormSection formContext={props.formContext} index={0}/>
                     {props.formContext.formState.persons.length > 1 ? <PersonFormSection formContext={props.formContext} index={1}/>  : ''}
@@ -183,8 +174,8 @@ function DateOfBirthInput(props) {
 }
 
 function TargetRetirementAgeInput(props) {
-    const targetRetirementAgePopOver = <div><h5><strong>Optional:</strong> The date you want to retire.</h5>
-        <h5>Leave blank to let LifeSplat calculate your earliest feasible retirement date.</h5></div>
+    const targetRetirementAgePopOver = <div><strong>Optional:</strong> The date you want to retire.
+        Leave blank to let LifeSplat calculate your earliest feasible retirement date.</div>
 
     let targetRetirementAge = 'targetRetirementAge';
 
@@ -201,17 +192,17 @@ function TargetRetirementAgeInput(props) {
 }
 
 function SpendingSteps(props){
-    const spendingStepAmountPopOver = <div><h5>Annual amount you expect to spend.</h5></div>
-    const spendingStepAgePopOver = <div><h5>The age you will start spending the new amount. </h5></div>
+    const spendingStepAmountPopOver = <div>Annual amount you expect to spend.</div>
+    const spendingStepAgePopOver = <div>The age you will start spending the new amount. </div>
 
-    function handleSpendingStepNumberChange(event, i, fieldName) {
+    function handleSpendingStepNumberChange(event, i, fieldName, validator) {
         props.formContext.setFormStale();
-        props.formContext.setErrors(update(props.formContext.errors, {spendingSteps: {[i]: {[fieldName]: {$set: getErrorForNumber(event.target.value)}}}}))
+        props.formContext.setErrors(update(props.formContext.errors, {spendingSteps: {[i]: {[fieldName]: {$set: validator(event.target.value)}}}}))
         props.formContext.setFormState(update(props.formContext.formState, {spendingSteps :{[i]: {[fieldName]: {$set: event.target.value}}}}))
     }
 
-    let handleSpendingStepAgeChange = (spendingStepIndex) => (event) => handleSpendingStepNumberChange(event, spendingStepIndex, 'age')
-    let handleSpendingStepAmountChange = (spendingStepIndex) => (event) => handleSpendingStepNumberChange(event, spendingStepIndex, 'amount')
+    let handleSpendingStepAgeChange = (spendingStepIndex) => (event) => handleSpendingStepNumberChange(event, spendingStepIndex, 'age', getErrorForValidNumberLessThan100)
+    let handleSpendingStepAmountChange = (spendingStepIndex) => (event) => handleSpendingStepNumberChange(event, spendingStepIndex, 'amount', getErrorForNumber)
 
     let steps = props.formContext.formState.spendingSteps.map((x, i)=>{
         return (<div className={"d-flex"} key={i}>
@@ -220,7 +211,7 @@ function SpendingSteps(props){
                 Age:
             </FormInput>
             <FormInputMoney error={props.formContext.errors.spendingSteps[i].amount} handleChange={handleSpendingStepAmountChange(i)} value={x.spending}
-                            placeHolder={'spending'} popOver={spendingStepAmountPopOver}>
+                            errorMessage={'Must be a whole number'} placeHolder={'spending'} popOver={spendingStepAmountPopOver}>
                 Amount:
             </FormInputMoney>
         </div>)
@@ -339,28 +330,25 @@ function Pop(message) {
 }
 
 //***Popovers
-const spendingPopOver = <div><h5>The total amount you and your family spend per year. e.g. 20000 or 20k</h5></div>
+const spendingPopOver = <div>The total amount you and your family spend per year. e.g. 20000 or 20k.</div>
 
-const emergencyFundPopOver = <div><h5>The amount of cash savings you expect to keep.</h5>
-    <hr/><h5>Specified as an amount e.g. 2000, 2k</h5>
-    <hr/><h5>Or specify a number of months expenditure you will keep as cash e.g. 3m</h5></div>
+const emergencyFundPopOver = <div>The amount of cash savings you aim to keep. Specified as an amount e.g. 2000, 2k. Or a number of months e.g. 3m.</div>
 
-const salaryPopOver = <div><h5>Your pre tax annual salary e.g. 20000 or 20k</h5></div>
+const salaryPopOver = <div>Your pre tax annual salary e.g. 20000 or 20k.</div>
 
-const savingsPopOver = <div><h5>Your current TOTAL savings including cash and investments e.g. shares, bonds, funds, bitcoin, gold, rental property</h5><hr/>
-    <h5>Include anything that is easily convertible into money and that you own specifically as a store of wealth or to earn a profit.</h5><hr/>
-    <h5>For rental property include the cash value you would receive should you sell it i.e. minus mortgage repayment and other expenses</h5></div>
+const savingsPopOver = <div>Your current TOTAL savings including cash and investments e.g. shares, bonds, funds, bitcoin, gold, rental property.<br/>
+       For rental property include the cash value you would receive should you sell it i.e. minus mortgage repayment and other expenses.</div>
 
-const pensionPopOver = <div><h5>The total cash value of your existing private pensions.</h5></div>
+const pensionPopOver = <div>The total cash value of your existing private pensions.</div>
 
-const employerContributionPopOver = <div><h5>The amount your employer contributes to your pension as a % or your salary</h5>
-    <hr/><h5>3% is the minimum under auto enrolment, unless you opted out.</h5></div>
+const employerContributionPopOver = <div>The amount your employer contributes to your pension as a % or your salary.
+    <br/>3% is the minimum under auto enrolment, unless you opted out.</div>
 
-const employeeContributionPopOver = <div><h5>The amount you contribute to your pension as a % or your salary</h5>
-    <hr/><h5>5% is the minimum under auto enrolment, unless you opted out.</h5></div>
+const employeeContributionPopOver = <div>The amount you contribute to your pension as a % or your salary.
+    <br/>5% is the minimum under auto enrolment, unless you opted out.</div>
 
-const contributingYearsPopOver = <div><h5><strong>Optional:</strong> The number of qualifying years you have accrued towards your state pension.</h5><hr/>
-    <h5>Leave blank to let LifeSplat estimate your contributions. LifeSplat will assume you've been contributing from age 21.</h5></div>
+const contributingYearsPopOver = <div><strong>Optional:</strong> The number of qualifying years you have accrued towards your state pension.<br/>
+    Leave blank to let LifeSplat estimate your contributions. LifeSplat will assume you've been contributing from age 21.</div>
 
 //***Validators
 function getValidAgeError(value) {
@@ -377,6 +365,20 @@ function getErrorForNumber(value) {
     if(value.match(/^\d+$/) ||value.match(/^\d+[kK]$/))
         return
     return "Must be a whole number e.g. 2000, 2k" ;
+}
+
+function getErrorForValidNumberLessThan100(value) {
+    if(!value.match(/^\d+$/) || parseInt(value) > 100)
+        return "Must be between 18 and 100"
+}
+
+function between18and100(age) {
+    age = parseInt(age)
+    return age >= 18 && age < 100;
+}
+
+function isAWholeNumber(numberString) {
+    return getErrorForNumber(numberString) === undefined;
 }
 
 function getMoneyOrMonthError(value) {
