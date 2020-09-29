@@ -39,7 +39,7 @@ function AreaChart(props) {
                 label: {
                     yAdjust: a.yShift || 0,
                     xAdjust: a.xShift || 0,
-                    position: a.position || 'centre',
+                    position: a.position || 'top',
                     backgroundColor: 'white',
                     fontColor: 'black',
                     content: a.title,

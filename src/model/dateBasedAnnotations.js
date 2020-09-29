@@ -21,14 +21,14 @@ export default function dateBasedAnnotations(report) {
     let targetRetirementTime = message(ageBased, report.targetRetirementAge, report.targetRetirementDate) ;
     
     let newAnnotations = [
-        {axis: "x-axis-0", value: report.person[0].minimumPossibleRetirementDate, title: [wentBankrupt() ? 'Safe retirement' : 'You could retire', ...minRetirementTime], yShift: -50},
-        {axis: "x-axis-0", value: report.person[0].privateRetirementDate, title: ['Private Pension', ...privatePensionTime], yShift: 0},
-        {axis: "x-axis-0", value: report.person[0].stateRetirementDate, title: ['State Pension', ...statePensionTime], yShift: 0}]
+        {axis: "x-axis-0", value: report.person[0].minimumPossibleRetirementDate, title: [wentBankrupt() ? 'Safe retirement' : 'You could retire', ...minRetirementTime], yShift: 50},
+        {axis: "x-axis-0", value: report.person[0].privateRetirementDate, title: ['Private Pension', ...privatePensionTime], yShift: 150},
+        {axis: "x-axis-0", value: report.person[0].stateRetirementDate, title: ['State Pension', ...statePensionTime], yShift: 150}]
 
     if (report.person.length === 2)
     {
-        newAnnotations.unshift({axis: "x-axis-0", value: report.person[1].privateRetirementDate, title: ['Partners', 'Private Pension'], yShift: -100})
-        newAnnotations.unshift({axis: "x-axis-0", value: report.person[1].stateRetirementDate, title: ['Partner', 'State Pension'], yShift: -100})
+        newAnnotations.unshift({axis: "x-axis-0", value: report.person[1].privateRetirementDate, title: ['Partners', 'Private Pension'], yShift: 100})
+        newAnnotations.unshift({axis: "x-axis-0", value: report.person[1].stateRetirementDate, title: ['Partner', 'State Pension'], yShift: 100})
     }
 
     if (report.targetRetirementAge) {
