@@ -17,8 +17,12 @@ export default function SummaryReportForCouple(props) {
                     <span className="text-big text-danger">{person.bankruptAge}</span></div>;
             }
         } else {
-            return <div>{You(partner)} can retire {moment(person.minimumPossibleRetirementDate).format("MMM YYYY")} at age &nbsp;<span
-                className="text-big text-success">{person.minimumPossibleRetirementAge}</span></div>;
+            if(person.bankruptAge < 100)
+                return <div>{You(partner)} will go bankrupt {moment(person.bankruptDate).format("MMM YYYY")} age &nbsp;
+                    <span className="text-big text-danger">{person.bankruptAge}</span></div>
+            else
+                return <div>{You(partner)} can retire {moment(person.minimumPossibleRetirementDate).format("MMM YYYY")} at age &nbsp;<span
+                    className="text-big text-success">{person.minimumPossibleRetirementAge}</span></div>;
         }
     }
 
