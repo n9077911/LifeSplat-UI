@@ -36,7 +36,7 @@ export default function dateBasedAnnotations(report) {
             axis: "x-axis-0",
             value: moment(report.targetRetirementDate).add(-1, 'months'),
             title: ['Target retirement', ...targetRetirementTime],
-            yShift: -100
+            yShift: 0
         })
     }
     
