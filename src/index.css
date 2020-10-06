@@ -14,9 +14,8 @@
   width: 90px
 }
 
-.centerFlex {
+.centerAlign {
   align-items: center;
-  display: flex;
 }
 
 .no-wrap {

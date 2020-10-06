@@ -51,8 +51,8 @@ export default function UserInputForm(props) {
 
     function handleAddRemovePartner(event) {
         if (context.formState.persons.length === 1) {
-            context.formState.persons.push({dob: context.formState.persons[0].dob})
-            context.errors.persons.push({})
+            context.formState.persons.push({dob: context.formState.persons[0].dob, rental: []})
+            context.errors.persons.push({rental: []})
         } else {
             context.formState.persons.pop()
             context.errors.persons.pop()
@@ -78,22 +78,24 @@ export default function UserInputForm(props) {
         <form className="salaryForm mx-1 mx-md-3">
             <div className='' style={{width: '95vw'}}>
                 <div id="formComponents" className="d-flex-column flex-wrap">
-                    <div className="centerFlex">
-                        <StatefulMoneyInput context={props.formContext} path={['spending']} placeholder={'spending'} popOver={spendingPopOver}>
-                            Annual Spending
-                        </StatefulMoneyInput>
-                        <StatefulMoneyInput context={props.formContext} path={['emergencyFund']} placeholder={'optional'} popOver={emergencyFundPopOver}
-                                            validator={getMoneyOrMonthError}>
-                            Emergency Fund
-                        </StatefulMoneyInput>
-                        <SpendingSteps formContext={props.formContext}/>
-                        <button className="btn btn-primary mr-2 no-stretch" onClick={handleAddSpendingStep}>
-                            {"Add Spending Step"}
-                        </button>
-                        {context.formState.spendingSteps.length > 0 ? <button className="btn btn-primary mr-2 no-stretch" onClick={handleRemoveSpendingStep}>
-                            {"Remove"}
-                        </button> : ''}
-                        <TargetRetirementAgeInput formContext={props.formContext}/>
+                    <div id="jointInputs">
+                        <div className="centerAlign d-flex flex-wrap">
+                            <StatefulMoneyInput context={props.formContext} path={['spending']} placeholder={'spending'} popOver={spendingPopOver}>
+                                Annual Spending
+                            </StatefulMoneyInput>
+                            <StatefulMoneyInput context={props.formContext} path={['emergencyFund']} placeholder={'optional'} popOver={emergencyFundPopOver}
+                                                validator={getMoneyOrMonthError}>
+                                Emergency Fund
+                            </StatefulMoneyInput>
+                            <SpendingSteps formContext={props.formContext}/>
+                            <button className="btn btn-primary mr-2 no-stretch" onClick={handleAddSpendingStep}>
+                                {"Add Spending Step"}
+                            </button>
+                            {context.formState.spendingSteps.length > 0 ? <button className="btn btn-primary mr-2 no-stretch" onClick={handleRemoveSpendingStep}>
+                                {"Remove"}
+                            </button> : ''}
+                            <TargetRetirementAgeInput formContext={props.formContext}/>
+                        </div>
                     </div>
                     <PersonFormSection formContext={props.formContext} index={0}/>
                     {props.formContext.formState.persons.length > 1 ? <PersonFormSection formContext={props.formContext} index={1}/>  : ''}
@@ -112,26 +114,52 @@ export default function UserInputForm(props) {
 }
 
 function PersonFormSection(props) {
+    function handleAddRental(event){
+        event.preventDefault();
+        props.formContext.setFormStale()
+        props.formContext.setErrors(update(props.formContext.errors, {persons: {[props.index]: {rental: {$push: [{amount: '', age: ''}]}}}}))
+        props.formContext.setFormState(update(props.formContext.formState, {persons: {[props.index]: {rental: {$push: [{amount: '', age: ''}]}}}}))
+    }
+
+    function handleRemoveRental(rentalIndex){
+        return (event)=> {
+            event.preventDefault();
+            props.formContext.setFormStale()
+            props.formContext.errors.persons[props.index].rental.splice(rentalIndex, 1)
+            props.formContext.formState.persons[props.index].rental.splice(rentalIndex, 1)
+            props.formContext.setErrors(update(props.formContext.errors, {persons: {[props.index]: {rental: {$set: Array.from(props.formContext.errors.persons[props.index].rental)}}}}))
+            props.formContext.setFormState(update(props.formContext.formState, {persons: {[props.index]: {rental: {$set: Array.from(props.formContext.formState.persons[props.index].rental)}}}}))
+        }
+    }
+    
     return <div id={"person" + props.index}>
-        <div className="d-flex flex-wrap">
-            <StatefulMoneyInput context={props.formContext} path={['persons', props.index, 'salary']} placeholder={'salary'} popOver={salaryPopOver}>
-                Annual Salary
-            </StatefulMoneyInput>
-            <StatefulMoneyInput context={props.formContext} path={['persons', props.index, 'savings']} placeholder={'savings'} popOver={savingsPopOver}>
-                Savings
-            </StatefulMoneyInput>
-            <StatefulMoneyInput context={props.formContext} path={['persons', props.index, 'pension']} placeholder={'pension'} popOver={pensionPopOver}>
-                Existing Pension
-            </StatefulMoneyInput>
-            <StatefulPercentInput context={props.formContext} path={['persons', props.index, 'employerContribution']} popOver={employerContributionPopOver}>
-                Employer Contribution
-            </StatefulPercentInput>
-            <StatefulPercentInput context={props.formContext} path={['persons', props.index, 'employeeContribution']} popOver={employeeContributionPopOver}>
-                Employee Contribution
-            </StatefulPercentInput>
-            <NiContributingYearsInput context={props.formContext} index={props.index}/>
-            <DateOfBirthInput context={props.formContext} index={props.index}/>
-            <FormGenderRadio context={props.formContext} index={props.index}/>
+        <div className="d-flex-column flex-wrap">
+            <div className="centerAlign d-flex flex-wrap">
+                <StatefulMoneyInput context={props.formContext} path={['persons', props.index, 'salary']} placeholder={'salary'} popOver={salaryPopOver}>
+                    Annual Salary
+                </StatefulMoneyInput>
+                <StatefulMoneyInput context={props.formContext} path={['persons', props.index, 'savings']} placeholder={'savings'} popOver={savingsPopOver}>
+                    Savings
+                </StatefulMoneyInput>
+                <StatefulMoneyInput context={props.formContext} path={['persons', props.index, 'pension']} placeholder={'pension'} popOver={pensionPopOver}>
+                    Existing Pension
+                </StatefulMoneyInput>
+                <StatefulPercentInput context={props.formContext} path={['persons', props.index, 'employerContribution']} popOver={employerContributionPopOver}>
+                    Employer Contribution
+                </StatefulPercentInput>
+                <StatefulPercentInput context={props.formContext} path={['persons', props.index, 'employeeContribution']} popOver={employeeContributionPopOver}>
+                    Employee Contribution
+                </StatefulPercentInput>
+                <NiContributingYearsInput context={props.formContext} index={props.index}/>
+                <DateOfBirthInput context={props.formContext} index={props.index}/>
+                <FormGenderRadio context={props.formContext} index={props.index}/>
+                <button className="btn btn-primary mr-2 no-stretch"  onClick={handleAddRental}>
+                    {"Add BTL"}
+                </button>
+            </div>
+            <div>
+                <RentalProperty formContext={props.formContext} personIndex={props.index} handleRemoveRental={handleRemoveRental} />
+            </div>
         </div>
     </div>
 }
@@ -218,6 +246,46 @@ function SpendingSteps(props){
     })
 
     return (<div className={"d-flex"}>{steps}</div>)
+}
+
+function RentalProperty(props){
+    const grossRentPopover = <div>Annual amount of tax deductible expenses (exlcuding financing costs)</div>
+    const financingCostsPopOver = <div>Annual finacing costs - including mortgage interest AND arrangement fees (if you remortgage every 5 years divide the fees by 5 to give an annual number)</div>
+    const expensesPopOver = <div>Annual amount of tax deductible expenses (exlcuding financing costs)</div>
+
+    function handleRentalPropertyNumberChange(event, rentalIndex, fieldName, validator) {
+        props.formContext.setFormStale();
+        props.formContext.setErrors(update(props.formContext.errors, {persons: {[props.personIndex]: {rental: {[rentalIndex]: {[fieldName]: {$set: validator(event.target.value)}}}}}}))
+        props.formContext.setFormState(update(props.formContext.formState, {persons: {[props.personIndex]: {rental :{[rentalIndex]: {[fieldName]: {$set: event.target.value}}}}}}))
+    }
+
+    let handleGrossRentChange = (rentalIndex) => (event) => handleRentalPropertyNumberChange(event, rentalIndex, 'grossRent', getErrorForNumber)
+    let financingCostsChange = (rentalIndex) => (event) => handleRentalPropertyNumberChange(event, rentalIndex, 'mortgageCosts', getErrorForNumber)
+    let expensesChange = (rentalIndex) => (event) => handleRentalPropertyNumberChange(event, rentalIndex, 'expenses', getErrorForNumber)
+
+    let steps = props.formContext.formState.persons[props.personIndex].rental.map((x, i)=>{
+        return (<div key={i}>
+            <div  className="centerAlign d-flex flex-wrap" >
+                <FormInputMoney error={props.formContext.errors.persons[props.personIndex].rental[i].grossRent} handleChange={handleGrossRentChange(i)} value={x.grossRent}
+                            errorMessage={'Must be a whole number'} placeHolder={''} popOver={grossRentPopover}>
+                    Gross Rent:
+                </FormInputMoney>
+                <FormInputMoney error={props.formContext.errors.persons[props.personIndex].rental[i].mortgageCosts} handleChange={financingCostsChange(i)} value={x.mortgageCosts}
+                                errorMessage={'Must be a whole number'} placeHolder={''} popOver={financingCostsPopOver}>
+                    Mortgage Costs:
+                </FormInputMoney>
+                <FormInputMoney error={props.formContext.errors.persons[props.personIndex].rental[i].expenses} handleChange={expensesChange(i)} value={x.expenses}
+                                errorMessage={'Must be a whole number'} placeHolder={''} popOver={expensesPopOver}>
+                    Expenses:
+                </FormInputMoney>
+                <button className="btn btn-primary mr-2 no-stretch" onClick={props.handleRemoveRental(i)}>
+                    {"Remove"}
+                </button>
+            </div>
+        </div>)
+    })
+
+    return (<div className={"d-flex-column"}>{steps}</div>)
 }
 
 function FormGenderRadio(props) {
