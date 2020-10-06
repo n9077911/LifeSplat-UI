@@ -404,8 +404,7 @@ const emergencyFundPopOver = <div>The amount of cash savings you aim to keep. Sp
 
 const salaryPopOver = <div>Your pre tax annual salary e.g. 20000 or 20k.</div>
 
-const savingsPopOver = <div>Your current TOTAL savings including cash and investments e.g. shares, bonds, funds, bitcoin, gold, rental property.<br/>
-       For rental property include the cash value you would receive should you sell it i.e. minus mortgage repayment and other expenses.</div>
+const savingsPopOver = <div>Your current TOTAL savings including cash, emergemcy fund, and investments e.g. shares, bonds, funds, bitcoin, gold, rental.</div>
 
 const pensionPopOver = <div>The total cash value of your existing private pensions.</div>
 
