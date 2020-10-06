@@ -23,12 +23,17 @@ export default function MainPage() {
         targetRetirementAge: '',
         emergencyFund: emergencyFund, 
         spendingSteps: [], 
-        persons: [{salary: salary, savings: savings, pension: pension, employerContribution: "3", employeeContribution: "5", female: false, dob: new Date(1981, 4, 1)}]
+        persons: [{salary: salary, savings: savings, pension: pension, employerContribution: "3", employeeContribution: "5", female: false, dob: new Date(1981, 4, 1), 
+            rental: []}]
     })
-    const [errors, setErrors] = useState({spending: '', targetRetirementAge: '', targetCashSavings: '', spendingSteps: [], persons: [{}]})
+    const [errors, setErrors] = useState({spending: '', targetRetirementAge: '', targetCashSavings: '', spendingSteps: [], persons: [{rental: []}] })
 
     const submittedDob = useRef(formState.persons[0].dob);
     const fullyCalcd = useRef(true);
+
+    function rentalInfoDto(rental) {
+        return {mortgagePayments: convertMoneyStringToInt(rental.mortgageCosts), grossIncome: convertMoneyStringToInt(rental.grossRent), expenses: convertMoneyStringToInt(rental.expenses)}
+    }
 
     function requestBody(persons, spending, spendingSteps, targetRetirementAge, emergencyFund) {
         persons = persons.map((p) => {
@@ -39,7 +44,8 @@ export default function MainPage() {
                 employerContribution: parseFloat(p.employerContribution || '0'),
                 employeeContribution: parseFloat(p.employeeContribution || '0'),
                 female: p.female,
-                dob: p.dob
+                dob: p.dob,
+                rentalInfo: p.rental.map(rentalInfoDto)
             };
             if(typeof(p.niContributingYears) !== 'undefined')
                 personDto.niContributingYears = parseInt(p.niContributingYears)

@@ -3,6 +3,7 @@ import moment from "moment";
 export default function Report(report) {
     this.rawReport = report
     this.salaryIndex = report.stepsHeaders.indexOf('AfterTaxSalary')
+    this.rentalIncomeIndex = report.stepsHeaders.indexOf('AfterTaxRentalIncome')
     this.savingsIndex = report.stepsHeaders.indexOf('Cash')
     this.statePensionIndex = report.stepsHeaders.indexOf('StatePension')
     this.privatePensionGrowthIndex = report.stepsHeaders.indexOf('PrivatePensionGrowth')
@@ -18,6 +19,8 @@ export default function Report(report) {
     this.cashSavings = (x) => sumForIndex(x)(this.cashSavingsIndex)
 
     this.salary = (x) => sumForIndex(x)(this.salaryIndex)
+    
+    this.rentalIncome = (x) => sumForIndex(x)(this.rentalIncomeIndex)
 
     this.statePension = (x) => sumForIndex(x)(this.statePensionIndex)
 
@@ -73,7 +76,7 @@ export default function Report(report) {
 
     this.spending = () => sum(this.people.map(p => p.spending))
 
-    this.savingsSpent = (x) => this.stepSpending(x) - this.statePension(x) - this.privatePensionGrowthToSpend(x) - this.investmentGrowth(x) - this.salary(x);
+    this.savingsSpent = (x) => this.stepSpending(x) - this.statePension(x) - this.privatePensionGrowthToSpend(x) - this.investmentGrowth(x) - this.salary(x) - this.rentalIncome(x);
 
     this.stepDates = () => this.rawReport.person[0].steps.map(x => x[this.dateIndex])
     
