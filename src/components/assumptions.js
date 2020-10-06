@@ -17,6 +17,12 @@ function Assumptions(props) {
                             <li>The state pension is currently inflation protected (unless you retire in a country which doens't have an inflation agreement with the UK).</li>
                         </ul>
                     </li>
+                    <li className="mt-2 lead">You pay UK tax only.</li>
+                    <li className="mt-2 lead">Buy To Let Property is owned with an interest only mortgage or no mortgage.</li>
+                        <ul>
+                            <li>Repayment mortgages are currently not supported.</li>
+                            <li>The equity in the property is currently not counted towards your savings (this feature will come later)</li>
+                        </ul>
                     <li className="mt-2 lead">Your pension doesn't exceed the <a href="https://www.gov.uk/tax-on-your-private-pension/lifetime-allowance">Life Time Allowance</a>.</li>
                     <li className="mt-2 lead">Your salary remains constant.</li>
                     <li className="mt-2 lead">Your spending remains constant.</li>
