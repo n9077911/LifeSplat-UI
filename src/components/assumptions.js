@@ -23,7 +23,7 @@ function Assumptions(props) {
                             <li>Repayment mortgages are currently not supported.</li>
                             <li>The equity in the property is currently not counted towards your savings (this feature will come later)</li>
                         </ul>
-                    <li className="mt-2 lead">Your pension doesn't exceed the <a href="https://www.gov.uk/tax-on-your-private-pension/lifetime-allowance">Life Time Allowance</a>.</li>
+                    <li className="mt-2 lead">You take a 25% tax free lump sum at the point your private pension becomes available and pay any the Life Time Allowance charge if needed.</li>
                     <li className="mt-2 lead">Your salary remains constant.</li>
                     <li className="mt-2 lead">Your spending remains constant.</li>
                     <li className="mt-2 lead">The tax system remains constant.</li>
