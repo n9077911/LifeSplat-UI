@@ -60,7 +60,7 @@ export default function SummaryReportForCouple(props) {
             <ul>
                 <li>You can take a tax free lump sum of <span className="text-big text-success">{formatMoney(person.take25LumpSum)}</span></li>
                 <li>This leaves a pot of &nbsp;<span className="text-big text-success">{formatMoney(person.privatePensionPotAtCrystallisation)}</span></li>
-                <li>Which gives an income of &nbsp;<span className="text-big text-success">{formatMoney(person.privatePensionSafeWithdrawal)}</span></li>
+                <li>Which gives an annual income of &nbsp;<span className="text-big text-success">{formatMoney(person.privatePensionSafeWithdrawal)}</span></li>
                 {getLifeTimeAllowanceBreach(person)}
             </ul>
         </span>;
@@ -81,7 +81,7 @@ export default function SummaryReportForCouple(props) {
                 className="text-big text-success">{formatMoney(person.privatePensionPotCombinedAtPrivatePensionAge + person.savingsCombinedAtPrivatePensionAge)}</span></li>
             <li className="mt-2">Your {combined(partner)}total savings at state retirement age are &nbsp;<span
                 className="text-big text-success">{formatMoney(person.privatePensionPotCombinedAtStatePensionAge + person.savingsCombinedAtStatePensionAge)}</span></li>
-            <li className="mt-2">{Your(partner)} current take home salary is &nbsp;<span className="text-big text-success">{formatMoney(person.afterTaxSalary)}</span></li>
+            <li className="mt-2">{Your(partner)} current take home salary is &nbsp;<span className="text-big text-success">{formatMoney(person.afterTaxSalary)}</span> per annum</li>
             {person.takeHomeRentalIncome > 0 ?
                 <li className="mt-2">{Your(partner)} current take home rental income is &nbsp;<span className="text-big text-success">{formatMoney(person.takeHomeRentalIncome)}</span></li>
                 : ''}
