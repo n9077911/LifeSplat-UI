@@ -4,6 +4,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import update from 'immutability-helper';
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
+import convertMoneyStringToInt from "../model/convertMoneyStringToInt";
 
 export default function UserInputForm(props) {
     let context = props.formContext;
@@ -71,7 +72,32 @@ export default function UserInputForm(props) {
             context.setErrors(update(context.errors, {spendingSteps: {$set: spendingStepsErrors}}))
             return;
         }
+        if(setPensionContributionLimit(context))
+            return;
         props.formSubmit()
+    }
+
+
+    function setPensionContributionLimit(context){
+        let returnValue = false
+        context.formState.persons.forEach((person, i) => {
+            let salary = convertMoneyStringToInt(person.salary)
+            let totalPensionContribution = (salary * (person.employerContribution/100)) + (salary * (person.employeeContribution/100));
+                if (totalPensionContribution > 40000) {
+                    let newErrors = {...context.errors};
+                    newErrors.persons[i].employeeContribution = 'Pension contributions have exceeded £40,000'
+                    context.setErrors(newErrors)
+                    returnValue = true;
+                }
+                else
+                {
+                    let newErrors = {...context.errors};
+                    newErrors.persons[i].employeeContribution = ''
+                    context.setErrors(newErrors)
+                }
+            }
+        )
+        return returnValue;
     }
     
     return <div id="form">
@@ -348,8 +374,7 @@ function FormGroupLabel(props) {
 }
 
 function FormInputPercent(props) {
-    let error = 'Must be a number.';
-    return <FormInput error={props.error} handleChange={props.handleChange} value={props.value} errorMessage={error} append={'%'}
+    return <FormInput error={props.error} handleChange={props.handleChange} value={props.value} errorMessage={props.error} append={'%'}
                       inputClass="input-control-percent" popOver={props.popOver}>
         {props.children}
     </FormInput>

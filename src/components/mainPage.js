@@ -3,6 +3,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import TabbedRetirementReport from "./tabbedRetirementReport";
 import moment from "moment";
 import UserInputForm from "./userInputForm";
+import convertMoneyStringToInt from "../model/convertMoneyStringToInt";
 
 export default function MainPage() {
     let spendingDefault, salary, savings, pension, emergencyFund = ''
@@ -119,12 +120,4 @@ function InitialExplainer(){
     return <div className={"alert alert-primary initial-explainer"}>
         <h2>Welcome!</h2><h4>Enter your details to calculate your earliest feasible retirement date.</h4>
     </div>
-}
-
-function convertMoneyStringToInt(s) {
-    if(s === undefined)
-        return 0
-    if(s.match(/^\d+[kK]$/))
-        return parseInt(s.slice(0, -1)) * 1000
-    return parseInt(s || '0');
 }
