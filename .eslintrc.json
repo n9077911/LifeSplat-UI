@@ -19,6 +19,7 @@
           "int",
           "ni",
           "dob",
+          "dobs",
           "color",
           
           //css class names

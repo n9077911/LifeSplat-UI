@@ -5,6 +5,7 @@ import update from 'immutability-helper';
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
 import convertMoneyStringToInt from "../model/convertMoneyStringToInt";
+import moment from "moment";
 
 export default function UserInputForm(props) {
     let context = props.formContext;
@@ -52,7 +53,7 @@ export default function UserInputForm(props) {
 
     function handleAddRemovePartner(event) {
         if (context.formState.persons.length === 1) {
-            context.formState.persons.push({dob: context.formState.persons[0].dob, rental: []})
+            context.formState.persons.push({dob: context.formState.persons[0].dob, rental: [], children: []})
             context.errors.persons.push({rental: []})
         } else {
             context.formState.persons.pop()
@@ -177,8 +178,10 @@ function PersonFormSection(props) {
                     Employee Contribution
                 </StatefulPercentInput>
                 <NiContributingYearsInput context={props.formContext} index={props.index}/>
-                <DateOfBirthInput context={props.formContext} index={props.index}/>
+                <DateInput context={props.formContext} index={props.index} path={['persons', props.index, 'dob']}>DOB</DateInput>
                 <FormGenderRadio context={props.formContext} index={props.index}/>
+                <ChildrenSection context={props.formContext} index={props.index}/>
+                
                 <button className="btn btn-primary mr-2 no-stretch"  onClick={handleAddRental}>
                     {"Add BTL"}
                 </button>
@@ -188,6 +191,49 @@ function PersonFormSection(props) {
             </div>
         </div>
     </div>
+}
+
+function ChildrenSection(props){
+    
+    function handleAddChild(event) {
+        event.preventDefault();
+        props.context.setFormStale()
+        props.context.formState.persons[props.index].children.push(moment("1/1/2015").toDate())
+        props.context.setFormState({...props.context.formState})
+    }
+
+    function removeAddChild(event) {
+        event.preventDefault();
+        props.context.setFormStale()
+        props.context.formState.persons[props.index].children.pop()
+        props.context.setFormState({...props.context.formState})
+    }
+
+    function childrenSection(context, personIndex) {
+        return context.formState.persons[personIndex].children.map((c, i, )=>{
+            return <DateInput context={context} personIndex={personIndex} childIndex={i} path={['persons', personIndex, 'children', i]}>{'Dob - Child ' + (i+1)}</DateInput>
+        })
+    }
+
+    function disableAddChildBenefit(formState, personIndex) {
+        let otherPersonIndex = personIndex === 0 ? 1 : 0;
+        return formState.persons[otherPersonIndex]?.children.length > 0
+    }
+
+    return (<div className="centerAlign d-flex flex-wrap">
+        {childrenSection(props.context, props.index)}
+        <button className="btn btn-primary mr-2 no-stretch" onClick={handleAddChild} disabled={disableAddChildBenefit(props.context.formState, props.index)}>
+            {"Add Child Benefit"}
+        </button>
+        {
+            props.context.formState.persons[props.index].children.length > 0 
+            ?
+                <button className="btn btn-primary mr-2 no-stretch"  onClick={removeAddChild}>
+                    {"Remove Child"}
+                </button>
+            : ''
+        }
+    </div>)
 }
 
 function NiContributingYearsInput(props) {
@@ -207,8 +253,8 @@ function NiContributingYearsInput(props) {
     </div>
 }
 
-function DateOfBirthInput(props) {
-    let path = ['persons', props.index, 'dob']
+function DateInput(props) {
+    let path = props.path
 
     function handleChange(event) {
         props.context.setFormState(update(props.context.formState, getSetObject(path, event)))
@@ -216,13 +262,14 @@ function DateOfBirthInput(props) {
     }
 
     return <div className="form-group">
-        <FormGroupLabel>DOB</FormGroupLabel>
-        <div className="mr-1"><DatePicker
-            selected={props.context.formState.persons[props.index].dob}
+        <FormGroupLabel>{props.children}</FormGroupLabel>
+        <div className=""><DatePicker
+            selected={navigate(props.context.formState, path)}
             onChange={handleChange}
             showYearDropdown
             showMonthDropdown
-            dateFormat="dd/MM/yyyy"/>
+            dateFormat="dd/MM/yyyy"
+            className="date-picker mr-1"/>
         </div>
     </div>
 }
@@ -320,7 +367,7 @@ function FormGenderRadio(props) {
         props.context.setFormState(update(props.context.formState, {persons: {[props.index]: {female: {$set: event.target.value === "true"}}}}))
     }
 
-    return <div className="mr-1 mt-3">
+    return <div className="mr-2 mt-3">
         <fieldset className="form-group" onChange={handleMaleFemale}>
             <div>
                 <div className="form-check">
@@ -439,8 +486,9 @@ const employerContributionPopOver = <div>The amount your employer contributes to
 const employeeContributionPopOver = <div>The amount you contribute to your pension as a % or your salary.
     <br/>5% is the minimum under auto enrolment, unless you opted out.</div>
 
-const contributingYearsPopOver = <div><strong>Optional:</strong> The number of qualifying years you have accrued towards your state pension.<br/>
-    Leave blank to let LifeSplat estimate your contributions. LifeSplat will assume you've been contributing from age 21.</div>
+const contributingYearsPopOver = <div><strong>Optional:</strong> The number of qualifying years you have accrued towards your state pension so far. 
+    Leave blank to let LifeSplat estimate your contributions so far based on contributions from age 21.<br/>
+    Future years will be projected based on earnings and children.</div>
 
 //***Validators
 function getValidAgeError(value) {

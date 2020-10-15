@@ -12,7 +12,7 @@ export default function SummaryReportForCouple(props) {
         if (props.report.targetRetirementAge) {
             if (targetRetirementAfterMinPossible(report, person)) {
                 return <div>{You(partner)} plan to retire age &nbsp;
-                    <span className="text-big text-success">{person.privateRetirementCrystallisationAge}</span>, but {LowerYou(partner)} could retire at age &nbsp;
+                    <span className="text-big text-success">{person.targetRetirementAge}</span>, but {LowerYou(partner)} could retire at age &nbsp;
                     <span className="text-big text-success">{person.minimumPossibleRetirementAge}</span></div>;
             } else {
                 return <div>{You(partner)} plan to retire age &nbsp;
@@ -55,13 +55,13 @@ export default function SummaryReportForCouple(props) {
 
     function getPrivatePensionSummary(report, person, partner) {
         return <span>
-            {Your(partner)} private pension pot might be &nbsp;<span className="text-big text-success">{formatMoney(person.privatePensionPotAtCrystallisationBeforeTake25)}</span>
+            {Your(partner)} private pension pot might be &nbsp;<span className="text-big text-success">{formatMoney(person.privatePensionPotBeforeCrystallisation)}</span>
             {person.privateRetirementAge !== person.privateRetirementCrystallisationAge ? <span>&nbsp;<small>(at age {person.privateRetirementCrystallisationAge})</small></span> : ''}
             <ul>
+                {getLifeTimeAllowanceBreach(person)}
                 <li>You can take a tax free lump sum of <span className="text-big text-success">{formatMoney(person.take25LumpSum)}</span></li>
                 <li>This leaves a pot of &nbsp;<span className="text-big text-success">{formatMoney(person.privatePensionPotAtCrystallisation)}</span></li>
                 <li>Which gives an annual income of &nbsp;<span className="text-big text-success">{formatMoney(person.privatePensionSafeWithdrawal)}</span></li>
-                {getLifeTimeAllowanceBreach(person)}
             </ul>
         </span>;
     }

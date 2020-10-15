@@ -25,7 +25,7 @@ export default function MainPage() {
         emergencyFund: emergencyFund, 
         spendingSteps: [], 
         persons: [{salary: salary, savings: savings, pension: pension, employerContribution: "3", employeeContribution: "5", female: false, dob: new Date(1981, 4, 1), 
-            rental: []}]
+            rental: [], children: []}]
     })
     const [errors, setErrors] = useState({spending: '', targetRetirementAge: '', targetCashSavings: '', spendingSteps: [], persons: [{rental: []}] })
 
@@ -46,7 +46,8 @@ export default function MainPage() {
                 employeeContribution: parseFloat(p.employeeContribution || '0'),
                 female: p.female,
                 dob: p.dob,
-                rentalInfo: p.rental.map(rentalInfoDto)
+                rentalInfo: p.rental.map(rentalInfoDto),
+                childrenDobs: p.children
             };
             if(typeof(p.niContributingYears) !== 'undefined')
                 personDto.niContributingYears = parseInt(p.niContributingYears)

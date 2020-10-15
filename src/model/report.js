@@ -12,8 +12,11 @@ export default function Report(report) {
     this.dateIndex = report.stepsHeaders.indexOf('Date')
     this.spendingIndex = report.stepsHeaders.indexOf('Spending')
     this.cashSavingsIndex = report.stepsHeaders.indexOf('CashSavings')
+    this.childBenefitIndex = report.stepsHeaders.indexOf('ChildBenefit')
     this.people = report.person;
 
+    this.childBenefit = (x) => sumForIndex(x)(this.childBenefitIndex)
+    
     this.savings = (x) => sumForIndex(x)(this.savingsIndex)
 
     this.cashSavings = (x) => sumForIndex(x)(this.cashSavingsIndex)
@@ -86,7 +89,6 @@ export default function Report(report) {
         let numbers = this.people.map(p => p.steps[x][index]);
         return sum(numbers)
     }
-    
 
     function sum(numbers) {
         let result = 0;

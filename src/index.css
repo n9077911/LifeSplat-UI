@@ -41,6 +41,10 @@
   max-width: 115px;
 }
 
+.date-picker {
+  max-width: 110px;
+}
+
 .max-width-30 {
   max-width: 30px;
 }
