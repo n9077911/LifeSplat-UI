@@ -1,5 +1,5 @@
 import moment from "moment";
-import {formatMoney} from "../helpers";
+import {formatMoney, formatPercent} from "../helpers";
 import React from "react";
 
 export default function SummaryReportForCouple(props) {
@@ -13,7 +13,14 @@ export default function SummaryReportForCouple(props) {
             if (targetRetirementAfterMinPossible(report, person)) {
                 return <div>{You(partner)} plan to retire age &nbsp;
                     <span className="text-big text-success">{person.targetRetirementAge}</span>, but {LowerYou(partner)} could retire at age &nbsp;
-                    <span className="text-big text-success">{person.minimumPossibleRetirementAge}</span></div>;
+                    <span className="text-big text-success">{person.minimumPossibleRetirementAge}</span>
+                    <ul>
+                        <li className="mt-2">{YouCombined(report.person.length > 1)} should have
+                            &nbsp;<span className="text-big text-success">{formatMoney(report.savingsCombinedAtTargetRetirementAge + report.privatePensionCombinedAtTargetRetirementAge)}</span>
+                            &nbsp;of savings and investments.
+                        </li>
+                    </ul>
+                </div>;
             } else {
                 return <div>{You(partner)} plan to retire age &nbsp;
                     <span className="text-big text-danger">{report.targetRetirementAge}</span>, but would go bankrupt {moment(person.bankruptDate).format("MMM YYYY")} age &nbsp;
@@ -25,7 +32,14 @@ export default function SummaryReportForCouple(props) {
                     <span className="text-big text-danger">{person.bankruptAge}</span></div>
             else
                 return <div>{You(partner)} can retire {moment(person.minimumPossibleRetirementDate).format("MMM YYYY")} at age &nbsp;<span
-                    className="text-big text-success">{person.minimumPossibleRetirementAge}</span></div>;
+                    className="text-big text-success">{person.minimumPossibleRetirementAge}</span>
+                    <ul>
+                        <li className="mt-2">{YouCombined(report.person.length > 1)} should have
+                            &nbsp;<span className="text-big text-success">{formatMoney(report.savingsCombinedAtFinancialIndependenceAge + report.privatePensionCombinedAtFinancialIndependenceAge)}</span>
+                            &nbsp;of savings and investments.
+                        </li>
+                    </ul>
+            </div>;
         }
     }
 
@@ -35,6 +49,10 @@ export default function SummaryReportForCouple(props) {
     
     function You(partner) {
         return <span>{partner ? 'They ' : 'You '}</span>;
+    }
+    
+    function YouCombined(twoPeople) {
+        return <span>{twoPeople ? 'Combined you' : 'You '}</span>;
     }
     
     function LowerYou(partner) {
@@ -77,13 +95,15 @@ export default function SummaryReportForCouple(props) {
             <li className="mt-2">{Your(partner)} private pension becomes available {moment(person.privateRetirementDate).format("MMM YYYY")} at age &nbsp;<span
                 className="text-big text-success">{person.privateRetirementAge}</span></li>
             <li className="mt-2">{getPrivatePensionSummary(report, person, partner)}</li>
-            <li className="mt-2">Your {combined(partner)}total savings at private retirement age are &nbsp;<span
-                className="text-big text-success">{formatMoney(person.privatePensionPotCombinedAtPrivatePensionAge + person.savingsCombinedAtPrivatePensionAge)}</span></li>
-            <li className="mt-2">Your {combined(partner)}total savings at state retirement age are &nbsp;<span
-                className="text-big text-success">{formatMoney(person.privatePensionPotCombinedAtStatePensionAge + person.savingsCombinedAtStatePensionAge)}</span></li>
-            <li className="mt-2">{Your(partner)} current take home salary is &nbsp;<span className="text-big text-success">{formatMoney(person.afterTaxSalary)}</span> per annum</li>
+            
+            <li className="mt-2">{Your(partner)} current after tax salary is &nbsp;<span className="text-big text-success">{formatMoney(person.afterTaxSalary+ person.pensionContributions)}</span> per annum</li>
+            <ul>
+                <li><span className="text-big text-success">{formatMoney(person.afterTaxSalary)}</span> as salary and <span className="text-big text-success">{formatMoney(person.pensionContributions)}</span> as pension contributions. </li>
+                <li className="mt-2">{YouCombined(partner)} have a savings rate of &nbsp;<span className="text-big text-success">{formatPercent(report.currentSavingsRate)}</span>
+                    &nbsp;&nbsp;<small>(savings / after tax earnings)</small></li>
+            </ul>
             {person.takeHomeRentalIncome > 0 ?
-                <li className="mt-2">{Your(partner)} current take home rental income is &nbsp;<span className="text-big text-success">{formatMoney(person.takeHomeRentalIncome)}</span></li>
+                <li className="mt-2">{Your(partner)} current after tax rental income is &nbsp;<span className="text-big text-success">{formatMoney(person.takeHomeRentalIncome)}</span></li>
                 : ''}
             <li className="mt-2">{You(partner)} currently pay <span className="text-big text-danger">{formatMoney(person.nationalInsuranceBill + person.incomeTaxBill + person.rentalTaxBill)}</span> of
                 tax

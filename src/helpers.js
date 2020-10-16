@@ -2,6 +2,10 @@ export function formatMoney(number) {
     return '£' + Math.round(number).toLocaleString()
 }
 
+export function formatPercent(number) {
+    return Math.round(number).toLocaleString() + '%'
+}
+
 export function last(array) {
     return array[array.length - 1];
 }

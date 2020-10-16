@@ -79,7 +79,7 @@ export default function Report(report) {
 
     this.spending = () => sum(this.people.map(p => p.spending))
 
-    this.savingsSpent = (x) => this.stepSpending(x) - this.statePension(x) - this.privatePensionGrowthToSpend(x) - this.investmentGrowth(x) - this.salary(x) - this.rentalIncome(x);
+    this.savingsSpent = (x) => this.stepSpending(x) - this.statePension(x) - this.privatePensionGrowthToSpend(x) - this.investmentGrowth(x) - this.salary(x) - this.rentalIncome(x) - this.childBenefit(x);
 
     this.stepDates = () => this.rawReport.person[0].steps.map(x => x[this.dateIndex])
     
