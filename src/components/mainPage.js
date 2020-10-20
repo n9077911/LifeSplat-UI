@@ -3,6 +3,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import TabbedRetirementReport from "./tabbedRetirementReport";
 import moment from "moment";
 import UserInputForm from "./userInputForm";
+import convertMoneyStringToInt from "../model/convertMoneyStringToInt";
 
 export default function MainPage() {
     let spendingDefault, salary, savings, pension, emergencyFund = ''
@@ -24,7 +25,7 @@ export default function MainPage() {
         emergencyFund: emergencyFund, 
         spendingSteps: [], 
         persons: [{salary: salary, savings: savings, pension: pension, employerContribution: "3", employeeContribution: "5", female: false, dob: new Date(1981, 4, 1), 
-            rental: []}]
+            rental: [], children: []}]
     })
     const [errors, setErrors] = useState({spending: '', targetRetirementAge: '', targetCashSavings: '', spendingSteps: [], persons: [{rental: []}] })
 
@@ -45,7 +46,8 @@ export default function MainPage() {
                 employeeContribution: parseFloat(p.employeeContribution || '0'),
                 female: p.female,
                 dob: p.dob,
-                rentalInfo: p.rental.map(rentalInfoDto)
+                rentalInfo: p.rental.map(rentalInfoDto),
+                childrenDobs: p.children
             };
             if(typeof(p.niContributingYears) !== 'undefined')
                 personDto.niContributingYears = parseInt(p.niContributingYears)
@@ -119,12 +121,4 @@ function InitialExplainer(){
     return <div className={"alert alert-primary initial-explainer"}>
         <h2>Welcome!</h2><h4>Enter your details to calculate your earliest feasible retirement date.</h4>
     </div>
-}
-
-function convertMoneyStringToInt(s) {
-    if(s === undefined)
-        return 0
-    if(s.match(/^\d+[kK]$/))
-        return parseInt(s.slice(0, -1)) * 1000
-    return parseInt(s || '0');
 }
