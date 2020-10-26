@@ -9,74 +9,34 @@ export default function MainPage() {
     let spendingDefault, salary, savings, pension, emergencyFund = ''
     let url = process.env.REACT_APP_SERVICE_URL;
 
-    if(process.env.REACT_APP_ENV === 'dev')
-    {
+    if (process.env.REACT_APP_ENV === 'dev') {
         spendingDefault = process.env.REACT_APP_SPENDING
         salary = process.env.REACT_APP_SALARY
         savings = process.env.REACT_APP_SAVINGS
         pension = process.env.REACT_APP_PENSION
         emergencyFund = process.env.REACT_APP_EMERGENCY_FUND
     }
-    
+
     const [result, setResult] = useState({})
     const [formState, setFormState] = useState({
-        spending: spendingDefault, 
+        spending: spendingDefault,
         targetRetirementAge: '',
-        emergencyFund: emergencyFund, 
-        spendingSteps: [], 
-        persons: [{salary: salary, savings: savings, pension: pension, employerContribution: "3", employeeContribution: "5", female: false, dob: new Date(1981, 4, 1), 
-            rental: [], children: []}]
+        emergencyFund: emergencyFund,
+        spendingSteps: [],
+        persons: [{
+            salary: salary, savings: savings, pension: pension, employerContribution: "3", employeeContribution: "5", female: false, dob: new Date(1981, 4, 1),
+            rental: [], children: []
+        }]
     })
-    const [errors, setErrors] = useState({spending: '', targetRetirementAge: '', targetCashSavings: '', spendingSteps: [], persons: [{rental: []}] })
+    const [errors, setErrors] = useState({spending: '', targetRetirementAge: '', targetCashSavings: '', spendingSteps: [], persons: [{rental: []}]})
 
     const submittedDob = useRef(formState.persons[0].dob);
     const fullyCalcd = useRef(true);
-
-    function rentalInfoDto(rental) {
-        return {mortgagePayments: convertMoneyStringToInt(rental.mortgageCosts), grossIncome: convertMoneyStringToInt(rental.grossRent), expenses: convertMoneyStringToInt(rental.expenses)}
-    }
-
-    function requestBody(persons, spending, spendingSteps, targetRetirementAge, emergencyFund) {
-        persons = persons.map((p) => {
-            let personDto = {
-                salary: convertMoneyStringToInt(p.salary),
-                savings: convertMoneyStringToInt(p.savings),
-                pension: convertMoneyStringToInt(p.pension),
-                employerContribution: parseFloat(p.employerContribution || '0'),
-                employeeContribution: parseFloat(p.employeeContribution || '0'),
-                female: p.female,
-                dob: p.dob,
-                rentalInfo: p.rental.map(rentalInfoDto),
-                childrenDobs: p.children
-            };
-            if(typeof(p.niContributingYears) !== 'undefined')
-                personDto.niContributingYears = parseInt(p.niContributingYears)
-            return personDto
-        })
-
-        let steps = spendingSteps.map((x) => ({amount: convertMoneyStringToInt(x.amount), age: parseInt(x.age)}));
-        steps.unshift({date: moment().toDate(), amount: convertMoneyStringToInt(spending)});
-        
-        return {
-            targetRetirementAge: targetRetirementAge === '' ? 0 : parseInt(targetRetirementAge),
-            emergencyFund: emergencyFund,
-            persons: persons,
-            spendingSteps: steps,
-        }
-    }
+    const populatedByUrl = useRef(false);
 
     const loadReportFromServer = useCallback(() => {
-        let body = JSON.stringify(requestBody(formState.persons, formState.spending, formState.spendingSteps, formState.targetRetirementAge, formState.emergencyFund));
-        fetch(url, {
-            method: 'POST',
-            accept: 'application/json',
-            cache: 'no-cache',
-            credentials: 'same-origin',
-            headers: {},
-            redirect: 'follow',
-            referrerPolicy: 'no-referrer',
-            body: body
-        })
+        let body = JSON.stringify(formState);
+        fetch(url + '?criteria=' + body)
             .then((response) => {
                 return response.json()
             })
@@ -84,6 +44,7 @@ export default function MainPage() {
                 fullyCalcd.current = true;
                 submittedDob.current = formState.persons[0].dob;
                 setResult(data)
+                window.history.replaceState(null, null, window.location.origin + `?criteria=${body}`)
             })
             .catch(reason => {
                     setResult({error: reason.toString()})
@@ -104,21 +65,50 @@ export default function MainPage() {
         return typeof result.person !== 'undefined'
     }
 
+    function populateFormFromUrl() {
+        if (!reportHasRan()) {
+            let text = window.location.search;
+            if (text.startsWith('?criteria=') && !populatedByUrl.current) {
+                text = text.replaceAll('%22', '"')
+                text = text.slice(10)
+                let state = JSON.parse(text, dateReviver)
+                setFormState(state)
+                populatedByUrl.current = true
+            }
+        }
+    }
+
+    populateFormFromUrl();
+
     let formContext = {errors: errors, setErrors: setErrors, formState: formState, setFormState: setFormState, setFormStale: setFormStale}
 
     return (
         <div id="formAndResults" className="row d-flex flex-column">
             <div className={"mx-1 mx-md-3"}>{!reportHasRan() ? <InitialExplainer/> : ''}</div>
-            
+
             <UserInputForm formContext={formContext} formSubmit={handleSubmit} fullyCalcd={fullyCalcd.current}/>
-            
+
             <TabbedRetirementReport rawReport={result} dob={submittedDob.current}/>
         </div>
     );
 }
 
-function InitialExplainer(){
+function InitialExplainer() {
     return <div className={"alert alert-primary initial-explainer"}>
         <h2>Welcome!</h2><h4>Enter your details to calculate your earliest feasible retirement date.</h4>
     </div>
 }
+
+//Taken from https://stackoverflow.com/questions/15120256/json-parse-or-alternative-library-that-will-also-parse-dates/15120418#15120418
+//Required to round trip dates through JSON.Stringify and JSON.Parse
+function dateReviver(key, value) {
+    let a;
+    if (typeof value === 'string') {
+        a = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/.exec(value);
+        if (a) {
+            return new Date(Date.UTC(+a[1], +a[2] - 1, +a[3], +a[4],
+                +a[5], +a[6]));
+        }
+    }
+    return value;
+};
