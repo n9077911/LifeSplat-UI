@@ -1,9 +1,7 @@
 import React, {useCallback, useRef, useState} from 'react';
 import "react-datepicker/dist/react-datepicker.css";
 import TabbedRetirementReport from "./tabbedRetirementReport";
-import moment from "moment";
 import UserInputForm from "./userInputForm";
-import convertMoneyStringToInt from "../model/convertMoneyStringToInt";
 
 export default function MainPage() {
     let spendingDefault, salary, savings, pension, emergencyFund = ''
@@ -25,10 +23,10 @@ export default function MainPage() {
         spendingSteps: [],
         persons: [{
             salary: salary, savings: savings, pension: pension, employerContribution: "3", employeeContribution: "5", female: false, dob: new Date(1981, 4, 1),
-            rental: [], children: []
+            rental: [], children: [], salarySteps: []
         }]
     })
-    const [errors, setErrors] = useState({spending: '', targetRetirementAge: '', targetCashSavings: '', spendingSteps: [], persons: [{rental: []}]})
+    const [errors, setErrors] = useState({spending: '', targetRetirementAge: '', targetCashSavings: '', spendingSteps: [], persons: [{rental: [], salarySteps: []}]})
 
     const submittedDob = useRef(formState.persons[0].dob);
     const fullyCalcd = useRef(true);

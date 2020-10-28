@@ -53,8 +53,8 @@ export default function UserInputForm(props) {
 
     function handleAddRemovePartner(event) {
         if (context.formState.persons.length === 1) {
-            context.formState.persons.push({dob: context.formState.persons[0].dob, rental: [], children: []})
-            context.errors.persons.push({rental: []})
+            context.formState.persons.push({dob: context.formState.persons[0].dob, rental: [], children: [], salarySteps: []})
+            context.errors.persons.push({rental: [], salarySteps: []})
         } else {
             context.formState.persons.pop()
             context.errors.persons.pop()
@@ -165,6 +165,7 @@ function PersonFormSection(props) {
                 <StatefulMoneyInput context={props.formContext} path={['persons', props.index, 'salary']} placeholder={'salary'} popOver={salaryPopOver}>
                     Annual Salary
                 </StatefulMoneyInput>
+                <SalarySteps formContext={props.formContext} personIndex={props.index}/>
                 <StatefulMoneyInput context={props.formContext} path={['persons', props.index, 'savings']} placeholder={'savings'} popOver={savingsPopOver}>
                     Savings
                 </StatefulMoneyInput>
@@ -191,6 +192,63 @@ function PersonFormSection(props) {
             </div>
         </div>
     </div>
+}
+function SalarySteps(props){
+    let context = props.formContext
+    const salaryStepAmountPopOver = <div>Annual amount you expect to earn. (Use todays figures i.e. don't add extra for inflation.</div>
+    const salaryStepAgePopOver = <div>The age you will start earning the new amount.</div>
+
+
+    let handleAddSalaryStepForPerson = (personIndex) => (event) => handleAddSalaryStep(event, personIndex)
+    let handleRemoveSalaryStepForPerson = (personIndex) => (event) => handleRemoveSalaryStep(event, personIndex)
+
+    function handleAddSalaryStep(event, personIndex){
+        context.setFormStale()
+        context.setErrors(update(context.errors, {persons: {[personIndex]: {salarySteps: {$push: [{amount: '', age: ''}]}}}}))
+        context.setFormState(update(context.formState, {persons: {[personIndex]: {salarySteps: {$push: [{amount: '', age: ''}]}}}}))
+        event.preventDefault();
+    }
+
+    function handleRemoveSalaryStep(event, personIndex){
+        context.setFormStale()
+        context.errors.persons[personIndex].salarySteps.pop()
+        context.formState.persons[personIndex].salarySteps.pop()
+        context.setErrors(update(context.errors, {persons: {[personIndex]: {salarySteps: {$set: Array.from(context.errors.persons[personIndex].salarySteps)}}}}))
+        context.setFormState(update(context.formState, {persons: {[personIndex]: {salarySteps: {$set: Array.from(context.formState.persons[personIndex].salarySteps)}}}}))
+        event.preventDefault();
+    }
+
+    function handleSalaryStepNumberChange(event, personIndex, stepIndex, fieldName, validator) {
+        props.formContext.setFormStale();
+        props.formContext.setErrors(update(props.formContext.errors, {persons: {[personIndex]: {salarySteps: {[stepIndex]: {[fieldName]: {$set: validator(event.target.value)}}}}}}))
+        props.formContext.setFormState(update(props.formContext.formState, {persons: {[personIndex]: {salarySteps :{[stepIndex]: {[fieldName]: {$set: event.target.value}}}}}}))
+    }
+
+    let handleSalaryStepAgeChange = (salaryStepIndex, personIndex) => (event) => handleSalaryStepNumberChange(event, personIndex, salaryStepIndex, 'age', getErrorForValidNumberLessThan100)
+    let handleSalaryStepAmountChange = (salaryStepIndex, personIndex) => (event) => handleSalaryStepNumberChange(event, personIndex, salaryStepIndex, 'amount', getErrorForNumber)
+
+    let steps = props.formContext.formState.persons[props.personIndex].salarySteps.map((x, i)=>{
+        return (<div className={"d-flex"} key={i}>
+            <FormInput error={props.formContext.errors.persons[props.personIndex].salarySteps[i]?.age} handleChange={handleSalaryStepAgeChange(i, props.personIndex)} value={x.age}
+                       errorMessage={'Must be between 18 and 100'} inputClass="input-control-age" popOver={salaryStepAgePopOver}>
+                Age:
+            </FormInput>
+            <FormInputMoney error={props.formContext.errors.persons[props.personIndex].salarySteps[i]?.amount} handleChange={handleSalaryStepAmountChange(i, props.personIndex)} value={x.amount}
+                            errorMessage={'Must be a whole number'} placeHolder={'salary'} popOver={salaryStepAmountPopOver}>
+                Amount:
+            </FormInputMoney>
+        </div>)
+    })
+
+    return (<div className={"centerAlign d-flex"}>
+        {steps}
+        <button className="btn btn-primary mr-2 no-stretch" onClick={handleAddSalaryStepForPerson(props.personIndex)}>
+            {"Add Salary Step"}
+        </button>
+        {context.formState.persons[props.personIndex].salarySteps.length > 0 ? <button className="btn btn-primary mr-2 no-stretch" onClick={handleRemoveSalaryStepForPerson(props.personIndex)}>
+            {"Remove"}
+        </button> : ''}
+    </div>)
 }
 
 function ChildrenSection(props){
