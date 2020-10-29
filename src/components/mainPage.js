@@ -1,7 +1,7 @@
 import React, {useCallback, useRef, useState} from 'react';
 import "react-datepicker/dist/react-datepicker.css";
 import TabbedRetirementReport from "./tabbedRetirementReport";
-import UserInputForm from "./userInputForm";
+import UserInputForm, {addEmptyPersonError} from "./userInputForm";
 
 export default function MainPage() {
     let spendingDefault, salary, savings, pension, emergencyFund = ''
@@ -67,10 +67,19 @@ export default function MainPage() {
         if (!reportHasRan()) {
             let text = window.location.search;
             if (text.startsWith('?criteria=') && !populatedByUrl.current) {
+
                 text = text.replaceAll('%22', '"')
                 text = text.slice(10)
                 let state = JSON.parse(text, dateReviver)
                 setFormState(state)
+
+                let errorsCopy = {...errors}
+                if(state.persons.length === 2)
+                    errorsCopy = addEmptyPersonError(errorsCopy)
+                
+                setErrors(errorsCopy)
+
+
                 populatedByUrl.current = true
             }
         }
@@ -109,4 +118,4 @@ function dateReviver(key, value) {
         }
     }
     return value;
-};
+}

@@ -52,15 +52,17 @@ export default function UserInputForm(props) {
     }
 
     function handleAddRemovePartner(event) {
+        let errorsCopy = {...context.errors}
+
         if (context.formState.persons.length === 1) {
             context.formState.persons.push({dob: context.formState.persons[0].dob, rental: [], children: [], salarySteps: []})
-            context.errors.persons.push({rental: [], salarySteps: []})
+            errorsCopy = addEmptyPersonError(errorsCopy);
         } else {
             context.formState.persons.pop()
-            context.errors.persons.pop()
+            errorsCopy.persons.pop()
         }
         context.setFormStale();
-        context.setErrors(update(context.errors, {persons: {$set: Array.from(context.errors.persons)}}))
+        context.setErrors(errorsCopy)
         context.setFormState(update(context.formState, {persons: {$set: Array.from(context.formState.persons)}}))
 
         event.preventDefault();
@@ -365,11 +367,11 @@ function SpendingSteps(props){
 
     let steps = props.formContext.formState.spendingSteps.map((x, i)=>{
         return (<div className={"d-flex"} key={i}>
-            <FormInput error={props.formContext.errors.spendingSteps[i].age} handleChange={handleSpendingStepAgeChange(i)} value={x.age}
+            <FormInput error={props.formContext.errors.spendingSteps[i]?.age} handleChange={handleSpendingStepAgeChange(i)} value={x.age}
                        errorMessage={'Must be between 18 and 100'} inputClass="input-control-age" popOver={spendingStepAgePopOver}>
                 Age:
-            </FormInput>
-            <FormInputMoney error={props.formContext.errors.spendingSteps[i].amount} handleChange={handleSpendingStepAmountChange(i)} value={x.spending}
+            </FormInput>S
+            <FormInputMoney error={props.formContext.errors.spendingSteps[i]?.amount} handleChange={handleSpendingStepAmountChange(i)} value={x.amount}
                             errorMessage={'Must be a whole number'} placeHolder={'spending'} popOver={spendingStepAmountPopOver}>
                 Amount:
             </FormInputMoney>
@@ -397,15 +399,15 @@ function RentalProperty(props){
     let steps = props.formContext.formState.persons[props.personIndex].rental.map((x, i)=>{
         return (<div key={i}>
             <div  className="centerAlign d-flex flex-wrap" >
-                <FormInputMoney error={props.formContext.errors.persons[props.personIndex].rental[i].grossRent} handleChange={handleGrossRentChange(i)} value={x.grossRent}
+                <FormInputMoney error={props.formContext.errors.persons[props.personIndex].rental[i]?.grossRent} handleChange={handleGrossRentChange(i)} value={x.grossRent}
                             errorMessage={'Must be a whole number'} placeHolder={''} popOver={grossRentPopover}>
                     Gross Rent:
                 </FormInputMoney>
-                <FormInputMoney error={props.formContext.errors.persons[props.personIndex].rental[i].mortgageCosts} handleChange={financingCostsChange(i)} value={x.mortgageCosts}
+                <FormInputMoney error={props.formContext.errors.persons[props.personIndex].rental[i]?.mortgageCosts} handleChange={financingCostsChange(i)} value={x.mortgageCosts}
                                 errorMessage={'Must be a whole number'} placeHolder={''} popOver={financingCostsPopOver}>
                     Mortgage Costs:
                 </FormInputMoney>
-                <FormInputMoney error={props.formContext.errors.persons[props.personIndex].rental[i].expenses} handleChange={expensesChange(i)} value={x.expenses}
+                <FormInputMoney error={props.formContext.errors.persons[props.personIndex].rental[i]?.expenses} handleChange={expensesChange(i)} value={x.expenses}
                                 errorMessage={'Must be a whole number'} placeHolder={''} popOver={expensesPopOver}>
                     Expenses:
                 </FormInputMoney>
@@ -612,4 +614,10 @@ function getSetObject(path, value) {
     })
 
     return object;
+}
+
+
+export function addEmptyPersonError(errors) {
+    errors.persons.push({rental: [], salarySteps: []})
+    return errors
 }
