@@ -1,9 +1,7 @@
 import React, {useCallback, useRef, useState} from 'react';
 import "react-datepicker/dist/react-datepicker.css";
 import TabbedRetirementReport from "./tabbedRetirementReport";
-import moment from "moment";
-import UserInputForm from "./userInputForm";
-import convertMoneyStringToInt from "../model/convertMoneyStringToInt";
+import UserInputForm, {addEmptyPersonError} from "./userInputForm";
 
 export default function MainPage() {
     let spendingDefault, salary, savings, pension, emergencyFund = ''
@@ -25,10 +23,10 @@ export default function MainPage() {
         spendingSteps: [],
         persons: [{
             salary: salary, savings: savings, pension: pension, employerContribution: "3", employeeContribution: "5", female: false, dob: new Date(1981, 4, 1),
-            rental: [], children: []
+            rental: [], children: [], salarySteps: []
         }]
     })
-    const [errors, setErrors] = useState({spending: '', targetRetirementAge: '', targetCashSavings: '', spendingSteps: [], persons: [{rental: []}]})
+    const [errors, setErrors] = useState({spending: '', targetRetirementAge: '', targetCashSavings: '', spendingSteps: [], persons: [{rental: [], salarySteps: []}]})
 
     const submittedDob = useRef(formState.persons[0].dob);
     const fullyCalcd = useRef(true);
@@ -69,10 +67,19 @@ export default function MainPage() {
         if (!reportHasRan()) {
             let text = window.location.search;
             if (text.startsWith('?criteria=') && !populatedByUrl.current) {
+
                 text = text.replaceAll('%22', '"')
                 text = text.slice(10)
                 let state = JSON.parse(text, dateReviver)
                 setFormState(state)
+
+                let errorsCopy = {...errors}
+                if(state.persons.length === 2)
+                    errorsCopy = addEmptyPersonError(errorsCopy)
+                
+                setErrors(errorsCopy)
+
+
                 populatedByUrl.current = true
             }
         }
@@ -111,4 +118,4 @@ function dateReviver(key, value) {
         }
     }
     return value;
-};
+}
