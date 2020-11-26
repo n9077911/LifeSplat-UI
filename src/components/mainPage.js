@@ -64,6 +64,23 @@ export default function MainPage() {
     }
 
     function populateFormFromUrl() {
+        function setEmpty(errorsCopy) {
+            errorsCopy.spending = ''
+            errorsCopy.targetRetirementAge = ''
+            errorsCopy.emergencyFund = ''
+            errorsCopy.targetCashSavings = ''
+            errorsCopy.spendingSteps = errorsCopy.spendingSteps.map(spendingStep => ({amount: '', age: ''}))
+            
+            errorsCopy.persons = errorsCopy.persons.map(person =>(
+                {
+                    salary: '', savings: '', pension: '', employeeContribution: '', employerContribution: '', 
+                    rental: person.rental.map(rental => ({grossRent: '', mortgageCosts: '', expenses: ''})),
+                    salarySteps: person.salarySteps.map(salaryStep => ({amount: '', age: ''}))
+                }));
+            
+            return errorsCopy
+        }
+
         if (!reportHasRan()) {
             let text = window.location.search;
             if (text.startsWith('?criteria=') && !populatedByUrl.current) {
@@ -73,18 +90,16 @@ export default function MainPage() {
                 let state = JSON.parse(text, dateReviver)
                 setFormState(state)
 
-                let errorsCopy = {...errors}
-                if(state.persons.length === 2)
-                    errorsCopy = addEmptyPersonError(errorsCopy)
-                
+                let errorsCopy = {...state}
+                errorsCopy = setEmpty(errorsCopy);
+
                 setErrors(errorsCopy)
-
-
+                
                 populatedByUrl.current = true
             }
         }
     }
-
+    
     populateFormFromUrl();
 
     let formContext = {errors: errors, setErrors: setErrors, formState: formState, setFormState: setFormState, setFormStale: setFormStale}
