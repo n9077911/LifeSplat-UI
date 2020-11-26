@@ -370,7 +370,7 @@ function SpendingSteps(props){
             <FormInput error={props.formContext.errors.spendingSteps[i]?.age} handleChange={handleSpendingStepAgeChange(i)} value={x.age}
                        errorMessage={'Must be between 18 and 100'} inputClass="input-control-age" popOver={spendingStepAgePopOver}>
                 Age:
-            </FormInput>S
+            </FormInput>
             <FormInputMoney error={props.formContext.errors.spendingSteps[i]?.amount} handleChange={handleSpendingStepAmountChange(i)} value={x.amount}
                             errorMessage={'Must be a whole number'} placeHolder={'spending'} popOver={spendingStepAmountPopOver}>
                 Amount:
