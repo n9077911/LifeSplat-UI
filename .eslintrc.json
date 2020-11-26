@@ -21,6 +21,8 @@
           "dob",
           "dobs",
           "color",
+          "lifesplat",
+          "mailto",
           
           //css class names
           "90vw",
