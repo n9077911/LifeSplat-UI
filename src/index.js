@@ -13,7 +13,7 @@ class IncomeTax extends React.Component {
             <div className="container-fluid">
                 <div className="row">
                     <div className="ml-1 ml-md-3 mt-md-3 text-left">
-                        <h2>LifeSplat.com<small className="text-muted"> - v0.1-beta {process.env.REACT_APP_ENV === 'production' ? '' : process.env.REACT_APP_ENV}</small></h2>
+                        <h2>LifeSplat.com<small className="text-muted"> - v0.2-beta {process.env.REACT_APP_ENV === 'production' ? '' : process.env.REACT_APP_ENV} <a href="mailto:dale@lifesplat.com">dale@lifesplat.com</a></small></h2> 
                     </div>
                 </div>
                 <MainPage>
