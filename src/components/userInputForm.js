@@ -86,9 +86,9 @@ export default function UserInputForm(props) {
         context.formState.persons.forEach((person, i) => {
             let salary = convertMoneyStringToInt(person.salary)
             let totalPensionContribution = (salary * (person.employerContribution/100)) + (salary * (person.employeeContribution/100));
-                if (totalPensionContribution > 40000) {
+                if (totalPensionContribution > 60000) {
                     let newErrors = {...context.errors};
-                    newErrors.persons[i].employeeContribution = 'Pension contributions have exceeded £40,000'
+                    newErrors.persons[i].employeeContribution = 'Pension contributions have exceeded £60,000'
                     context.setErrors(newErrors)
                     returnValue = true;
                 }
