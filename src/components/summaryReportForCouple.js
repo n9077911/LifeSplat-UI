@@ -63,20 +63,11 @@ export default function SummaryReportForCouple(props) {
         return <span> {partner ? 'combined ' : ''}</span>;
     }
 
-    function getLifeTimeAllowanceBreach(person) {
-        if(person.lifeTimeAllowanceTaxCharge === 0)
-            return ''
-        
-        return <li>Your pot will likely breach the Life Time Allowance resulting in a tax charge of&nbsp;
-                <span className="text-big text-danger">{formatMoney(person.lifeTimeAllowanceTaxCharge)}</span>, you may want to seek advice about this</li>
-    }
-
     function getPrivatePensionSummary(report, person, partner) {
         return <span>
             {Your(partner)} private pension pot might be &nbsp;<span className="text-big text-success">{formatMoney(person.privatePensionPotBeforeCrystallisation)}</span>
             {person.privateRetirementAge !== person.privateRetirementCrystallisationAge ? <span>&nbsp;<small>(at age {person.privateRetirementCrystallisationAge})</small></span> : ''}
             <ul>
-                {getLifeTimeAllowanceBreach(person)}
                 <li>You can take a tax free lump sum of <span className="text-big text-success">{formatMoney(person.take25LumpSum)}</span></li>
                 <li>This leaves a pot of &nbsp;<span className="text-big text-success">{formatMoney(person.privatePensionPotAtCrystallisation)}</span></li>
                 <li>Which gives an annual income of &nbsp;<span className="text-big text-success">{formatMoney(person.privatePensionSafeWithdrawal)}</span></li>
